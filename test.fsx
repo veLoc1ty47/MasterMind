@@ -169,14 +169,38 @@ let guess (player : player) (board : board) : code =
     | Computer ->
         [Red]
 
-let gamePlay = 
+let gamePlay hiddenCode =
+    let mutable board : board = []
+    let mutable humanInput = []
+    let mutable humanGuess : code = [Red]
+    let mutable validation = (0,0)
+    let mutable whitePegs : int = 0
+    let mutable blackPegs : int = 0
+    let mutable tries : int = 0
+    while snd (validation) <> 4 do
+        humanGuess <- guess Human board
+        
+        //printf "%d: " tries
+        validation <- (validate hiddenCode humanGuess)
+        
+        
+        
+        whitePegs <- (fst validation)
+        blackPegs <- (snd validation)
+        
+        board <- board @ [(humanGuess, validation)]
+
+        tries <- tries + 1
+    tries
+    
 
 let rec game choice = 
-    let win player choice1 guessC = 
+    let win player choice1 guessC tries = 
         match player with
         | "Human" -> 
             System.Console.Clear()
             printfn "You win!"
+            printfn "It took you %d guesses!" tries
 
         | _ -> 
             printfn "The computer wins!"
@@ -198,13 +222,13 @@ let rec game choice =
             let p = System.Console.ReadLine()
             game "0"
 
-    let mutable board : board = []
+    (*let mutable board : board = []
     let mutable humanInput = []
     let mutable humanGuess : code = [Red]
     let mutable validation = (0,0)
     let mutable whitePegs : int = 0
     let mutable blackPegs : int = 0
-    let mutable tries : int = 10
+    let mutable tries : int = 10*)
             
     if choice = "0" then        
         //Startpage
@@ -272,7 +296,7 @@ let rec game choice =
     elif choice = "1" then
         //Human vs Computer
         // All of these variables will be used, no matter the game mode
-       (* let mutable board : board = []
+        (*let mutable board : board = []
         let mutable humanInput = []
         let mutable humanGuess : code = [Red]
         let mutable validation = (0,0)
@@ -286,22 +310,21 @@ let rec game choice =
         printfn "acts as the \"codemaker\""
         
         let hiddenCode = makeCode Computer
-        //printfn "%A" hiddenCode
         
         printfn "\nThe computer has now generated a code.\n"
         printf "Press ENTER to begin playing..."
         let p = System.Console.ReadLine()
          
-        while tries > 0 do
+        (*while tries > 0 do
             if tries <= 3 then
                 if tries = 1 then
                     printfn "\nYou only have 1 guess left. Be sure to make it count\n"
                 else
-                    printfn "\nYou only have %d guesses left. Be sure to make them count\n" tries
+                    printfn "\nYou only have %d guesses left. Be sure to make them count\n" tries*)
         
         
         
-            humanGuess <- guess Human board
+            (*humanGuess <- guess Human board
         
             validation <- (validate hiddenCode humanGuess)
         
@@ -312,10 +335,11 @@ let rec game choice =
             
             board <- board @ [(humanGuess, validation)]
 
-            if (snd validation) = 4 then
-                win "Human" "1" 0
+            if (snd validation) = 4 then*)
+        let k = gamePlay hiddenCode
+        win "Human" "1" 0 k  
         
-            tries <- tries - 1
+            (*tries <- tries - 1*)
     
     elif choice = "2" then
         //Human vs Human
@@ -338,7 +362,7 @@ let rec game choice =
         printf "Press ENTER to give control to player 2..."
         let p = System.Console.ReadLine()
         
-        while tries > 0 do
+        (*while tries > 0 do
             if tries <= 3 then
                 if tries = 1 then
                     printfn "\nYou only have 1 guess left. Be sure to make it count\n"
@@ -359,10 +383,10 @@ let rec game choice =
             board <- board @ [(humanGuess, validation)]
             
             if (snd validation) = 4 then
-                win "Human" "2" 0 
+                win "Human" "2" 0 *)
+        let k = gamePlay hiddenCode
+        win "Human" "2" 0 k 
         
-            tries <- tries - 1
-    
     elif choice = "3" then
         //Computer vs Human
         let mutable guessCount = 0
@@ -460,7 +484,7 @@ let rec game choice =
         let rec foo guess =
             match blacks with
             | 4 -> 
-                win "Comp" "3" guessCount
+                win "Comp" "3" guessCount 0
             | 2 ->
                 guessCode <- [guessCode.[3]] @ guessCode.[1..2] @ [guessCode.[0]]
                 // Bliver til 4 2 3 1 
@@ -468,56 +492,56 @@ let rec game choice =
         
                 match blacks with
                 | 4 -> 
-                    win "Comp" "3" guessCount
+                    win "Comp" "3" guessCount 0
                 | 2 ->
                     if guessCode.[0] = guessCode.[2] && guessCode.[1] = guessCode.[3] then
                         guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
                         if blacks = 4 then
-                            win "Comp" "3" guessCount
+                            win "Comp" "3" guessCount 0
                         else
                             guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]]
                             blacks <- snd (validate1 hiddenCode guessCode 1)
-                            win "Comp" "3" guessCount
+                            win "Comp" "3" guessCount 0
                     elif guessCode.[0] = guessCode.[2] then
                         guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "3" guessCount
+                        win "Comp" "3" guessCount 0
                     else
                         guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ guessCode.[2..3]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "3" guessCount
+                        win "Comp" "3" guessCount 0
                 | 0 ->
                     guessCode <- List.rev guessCode
                     blacks <- snd (validate1 hiddenCode guessCode 1)
-                    win "Comp" "3" guessCount
+                    win "Comp" "3" guessCount 0
                 | 1 ->
                     guessCode <- [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[3]] @ [guessCode.[0]]
                     // Bliver til 3 2 1 4
                     blacks <- snd (validate1 hiddenCode guessCode 1)
                     match blacks with
                     | 4 -> 
-                        win "Comp" "3" guessCount
+                        win "Comp" "3" guessCount 0
                     | 0 ->
                         guessCode <- [guessCode.[2]] @ [guessCode.[3]] @ [guessCode.[0]] @ [guessCode.[1]]
                         // Bliver til 1 4 3 2
                         blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "3" guessCount
+                        win "Comp" "3" guessCount 0
                     | 1 ->
                         guessCode <- [guessCode.[1]] @ [guessCode.[2]] @ [guessCode.[0]] @ [guessCode.[3]]
                         // Bliver til 2 1 3 4
                         blacks <- snd (validate1 hiddenCode guessCode 1)
                         match blacks with
                         | 4 -> 
-                            win "Comp" "3" guessCount
+                            win "Comp" "3" guessCount 0
                         | 2 -> 
                             guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
-                            win "Comp" "3" guessCount
+                            win "Comp" "3" guessCount 0
                         | 0 ->
                             guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]]
                             // Bliver til 1 2 4 3
                             blacks <- snd (validate1 hiddenCode guessCode 1)
-                            win "Comp" "3" guessCount
+                            win "Comp" "3" guessCount 0
                         | _ -> printfn "Nej"
                     | _ -> printfn "Hej"
                 | _ -> printfn "Hej"
@@ -531,11 +555,11 @@ let rec game choice =
                     if guessCode.[0] = guessCode.[2] then
                         guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[1]] @ [guessCode.[2]]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "3" guessCount
+                        win "Comp" "3" guessCount 0
                     else
                         guessCode <- [guessCode.[1]] @ [guessCode.[2]] @ [guessCode.[0]] @ [guessCode.[3]]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "3" guessCount
+                        win "Comp" "3" guessCount 0
                 | 0 ->
                     guessCode <- [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[0]]
                     foo guessCode 
@@ -547,13 +571,13 @@ let rec game choice =
                 blacks <- snd (validate1 hiddenCode guessCode 1)
                 match blacks with
                 | 4 -> 
-                    win "Comp" "3" guessCount
+                    win "Comp" "3" guessCount 0
                 | 1 ->  
                     if guessCode.[0] = guessCode.[3] then 
                         guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[1]] @ [guessCode.[2]]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
                         //bliver til 4 3 1 2 
-                        win "Comp" "3" guessCount
+                        win "Comp" "3" guessCount 0
                     else 
                         foo guessCode
                 | 2 ->
@@ -561,7 +585,7 @@ let rec game choice =
                         guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
                         //bliver til 4 3 2 1
-                        win "Comp" "3" guessCount
+                        win "Comp" "3" guessCount 0
                     else 
                         foo guessCode
                 | 0 ->
@@ -668,7 +692,7 @@ let rec game choice =
         let rec foo guess =
             match blacks with
             | 4 -> 
-                win "Comp" "4" guessCount
+                win "Comp" "4" guessCount 0
             | 2 ->
                 guessCode <- [guessCode.[3]] @ guessCode.[1..2] @ [guessCode.[0]]
                 // Bliver til 4 2 3 1 
@@ -676,56 +700,56 @@ let rec game choice =
         
                 match blacks with
                 | 4 -> 
-                    win "Comp" "4" guessCount
+                    win "Comp" "4" guessCount 0
                 | 2 ->
                     if guessCode.[0] = guessCode.[2] && guessCode.[1] = guessCode.[3] then
                         guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
                         if blacks = 4 then
-                            win "Comp" "4" guessCount
+                            win "Comp" "4" guessCount 0
                         else
                             guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]]
                             blacks <- snd (validate1 hiddenCode guessCode 1)
-                            win "Comp" "4" guessCount
+                            win "Comp" "4" guessCount 0
                     elif guessCode.[0] = guessCode.[2] then
                         guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "4" guessCount
+                        win "Comp" "4" guessCount 0
                     else
                         guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ guessCode.[2..3]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "4" guessCount
+                        win "Comp" "4" guessCount 0
                 | 0 ->
                     guessCode <- List.rev guessCode
                     blacks <- snd (validate1 hiddenCode guessCode 1)
-                    win "Comp" "4" guessCount
+                    win "Comp" "4" guessCount 0
                 | 1 ->
                     guessCode <- [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[3]] @ [guessCode.[0]]
                     // Bliver til 3 2 1 4
                     blacks <- snd (validate1 hiddenCode guessCode 1)
                     match blacks with
                     | 4 -> 
-                        win "Comp" "4" guessCount
+                        win "Comp" "4" guessCount 0
                     | 0 ->
                         guessCode <- [guessCode.[2]] @ [guessCode.[3]] @ [guessCode.[0]] @ [guessCode.[1]]
                         // Bliver til 1 4 3 2
                         blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "4" guessCount
+                        win "Comp" "4" guessCount 0
                     | 1 ->
                         guessCode <- [guessCode.[1]] @ [guessCode.[2]] @ [guessCode.[0]] @ [guessCode.[3]]
                         // Bliver til 2 1 3 4
                         blacks <- snd (validate1 hiddenCode guessCode 1)
                         match blacks with
                         | 4 -> 
-                            win "Comp" "4" guessCount
+                            win "Comp" "4" guessCount 0
                         | 2 -> 
                             guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
-                            win "Comp" "4" guessCount
+                            win "Comp" "4" guessCount 0
                         | 0 ->
                             guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]]
                             // Bliver til 1 2 4 3
                             blacks <- snd (validate1 hiddenCode guessCode 1)
-                            win "Comp" "4" guessCount
+                            win "Comp" "4" guessCount 0
                         | _ -> printfn "Hej"
                     | _ -> printfn "hej"
                 | _ -> printfn "hej"
@@ -739,11 +763,11 @@ let rec game choice =
                     if guessCode.[0] = guessCode.[2] then
                         guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[1]] @ [guessCode.[2]]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "4" guessCount
+                        win "Comp" "4" guessCount 0
                     else
                         guessCode <- [guessCode.[1]] @ [guessCode.[2]] @ [guessCode.[0]] @ [guessCode.[3]]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "4" guessCount
+                        win "Comp" "4" guessCount 0
                 | 0 ->
                     guessCode <- [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[0]]
                     foo guessCode 
@@ -755,13 +779,13 @@ let rec game choice =
                 blacks <- snd (validate1 hiddenCode guessCode 1)
                 match blacks with
                 | 4 -> 
-                    win "Comp" "4" guessCount
+                    win "Comp" "4" guessCount 0
                 | 1 ->  
                     if guessCode.[0] = guessCode.[3] then 
                         guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[1]] @ [guessCode.[2]]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
                         //bliver til 4 3 1 2 
-                        win "Comp" "4" guessCount
+                        win "Comp" "4" guessCount 0
                     else 
                         foo guessCode
                 | 2 ->
@@ -769,7 +793,7 @@ let rec game choice =
                         guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]]
                         blacks <- snd (validate1 hiddenCode guessCode 1)
                         //bliver til 4 3 2 1 
-                        win "Comp" "4" guessCount
+                        win "Comp" "4" guessCount 0
                     else 
                         foo guessCode
                 | 0 ->
