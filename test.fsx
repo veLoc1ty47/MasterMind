@@ -243,21 +243,19 @@ let rec game choice =
         //Første 6 gæt 
         let mutable whiteCounter = 0
         let mutable n = 0
-        let mutable i = 0
         let colors = [Red; Green; Yellow; Purple; White; Black]
         while (whiteCounter < 4) && (n < 6) do
             guessCode <- [colors.[n]; colors.[n]; colors.[n]; colors.[n]]
-            temp.[i] <- snd (validate hiddenCode [colors.[n]; colors.[n];
+            temp.[n] <- snd (validate hiddenCode [colors.[n]; colors.[n];
                                                   colors.[n]; colors.[n]])
-            whiteCounter <- whiteCounter + temp.[i]
+            whiteCounter <- whiteCounter + temp.[n]
             n <- n + 1
-            i <- i + 1
         
         
         
         //Histogram til gæt 
         guessCode <- []
-        for i=0 to 5 do
+        for i = 0 to 5 do
             while temp.[i] > 0 do
                 guessCode <- List.append guessCode [colors.[i]]
                 temp.[i] <- temp.[i] - 1
@@ -492,7 +490,10 @@ let rec game choice =
         
     elif choice = "3" then
         //Computer vs Human
+        guessCount <- 0
+
         System.Console.Clear()
+        
         printfn "Computer vs Human, with human acting as \"codemaker\""
 
         let hiddenCode = makeCode Human
@@ -506,6 +507,8 @@ let rec game choice =
 
     else
         //Computer vs Computer
+        guessCount <- 0
+
         System.Console.Clear()
         
         printfn "You chose the game mode Computer vs Computer"
