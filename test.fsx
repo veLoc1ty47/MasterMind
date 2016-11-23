@@ -167,59 +167,48 @@ let guess (player : player) (board : board) : code =
         
         inputCodeToCode userInput
     | Computer ->
-        printfn "whatever"
-   
+        [Red]
+
+let gamePlay = 
 
 let rec game choice = 
     let win player choice1 guessC = 
-        if player = "Human" then
+        match player with
+        | "Human" -> 
             System.Console.Clear()
-            printfn "You win!\n"
-            printfn "Would you like to:"
-            printfn "1. Go to the startpage?"
-            printfn "2. Play the same gamemode again?"
-            printfn "3. Quit the game?"
-            printf "> "
-            let userInput = System.Console.ReadLine ()
-   
-            match userInput with
-            | "1" -> game "0"
-            | "2" -> game choice1 
-            | "3" -> System.Environment.Exit 1
-            | _ -> 
-                printfn "Wrong input, you will be taken to the startpage..."
-                let p = System.Console.ReadLine()
-                game "0"
+            printfn "You win!"
 
-        else
-            printfn "\nThe computer wins!"
+        | _ -> 
+            printfn "The computer wins!"
             printfn "It took it %d guesses!" guessC
-            printfn "\nWould you like to:"
-            printfn "1. Go to the startpage?"
-            printfn "2. Play the same gamemode again?"
-            printfn "3. Quit the game?"
-            printf "> "
-            let userInput = System.Console.ReadLine ()
+            
+        printfn "\nWould you like to:"
+        printfn "1. Go to the startpage?"
+        printfn "2. Play the same gamemode again?"
+        printfn "3. Quit the game?"
+        printf "> "
+        let userInput = System.Console.ReadLine ()
    
-            match userInput with
-            | "1" -> game "0"
-            | "2" -> game choice1 
-            | "3" -> System.Environment.Exit 1
-            | _ ->
-                printfn "Wrong input, you will be taken to the startpage..."
-                let p = System.Console.ReadLine()
-                game "0"
+        match userInput with
+        | "1" -> game "0"
+        | "2" -> game choice1 
+        | "3" -> System.Environment.Exit 1
+        | _ ->
+            printfn "Wrong input, you will be taken to the startpage..."
+            let p = System.Console.ReadLine()
+            game "0"
+
+    let mutable board : board = []
+    let mutable humanInput = []
+    let mutable humanGuess : code = [Red]
+    let mutable validation = (0,0)
+    let mutable whitePegs : int = 0
+    let mutable blackPegs : int = 0
+    let mutable tries : int = 10
             
     if choice = "0" then        
         //Startpage
         // All of these variables will be used, no matter the game mode
-        let board : board = []
-        let mutable humanInput = []
-        let mutable humanGuess : code = [Red]
-        let mutable validation = (0,0)
-        let mutable whitePegs : int = 0
-        let mutable blackPegs : int = 0
-        let mutable tries : int = 10
        
         System.Console.Clear()
 
@@ -278,19 +267,18 @@ let rec game choice =
 
             playersInput <- System.Console.ReadLine ()
         
-        if (playersInputCorrect playersInput) = true then
-            game playersInput
+        game playersInput
     
     elif choice = "1" then
         //Human vs Computer
         // All of these variables will be used, no matter the game mode
-        let mutable board : board = []
+       (* let mutable board : board = []
         let mutable humanInput = []
         let mutable humanGuess : code = [Red]
         let mutable validation = (0,0)
         let mutable whitePegs : int = 0
         let mutable blackPegs : int = 0
-        let mutable tries : int = 10
+        let mutable tries : int = 10*)
        
         System.Console.Clear()
 
@@ -332,13 +320,13 @@ let rec game choice =
     elif choice = "2" then
         //Human vs Human
         // All of these variables will be used, no matter the game mode
-        let mutable board : board = []
+        (*let mutable board : board = []
         let mutable humanInput = []
         let mutable humanGuess : code = [Red]
         let mutable validation = (0,0)
         let mutable whitePegs : int = 0
         let mutable blackPegs : int = 0
-        let mutable tries : int = 10
+        let mutable tries : int = 10*)
         
         System.Console.Clear()
 
@@ -356,7 +344,9 @@ let rec game choice =
                     printfn "\nYou only have 1 guess left. Be sure to make it count\n"
                 else
                     printfn "\nYou only have %d guesses left. Be sure to make them count\n" tries
-        
+       
+
+
             humanGuess <- guess Human board
         
             validation <- (validate hiddenCode humanGuess)
