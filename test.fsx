@@ -73,7 +73,7 @@ let makeCode (player : player) : code =
         printfn "and each denoted by the first character in the name of the color"
         printfn "Example: B or b = Black"
         printfn "Example: r g y b"
-        printf "> "
+        printf "\n> "
         
         inputCode <- Array.toList ((System.Console.ReadLine ()).Split(' '))
         
@@ -105,6 +105,9 @@ let makeHisto (code : codeColor list) =
 
     (Array.toList histo)
 
+let mutable guessCount = 0
+let mutable blacksValidate = 0
+
 let validate (hidden : code) (guess : code) : answer =
     let histoHidden = makeHisto hidden
     let histoGuess = makeHisto guess
@@ -129,6 +132,11 @@ let validate (hidden : code) (guess : code) : answer =
 
     let blackPegs = blackFun hidden guess
     let whitePegs = sumPegs - blackPegs
+
+    guessCount <- guessCount + 1
+    if blacksValidate = 0 then
+        printfn "%d:  %A" guessCount guess
+    else ()
     
     (whitePegs, blackPegs)
 
@@ -149,9 +157,7 @@ let guess (player : player) (board : board) : code =
     | Human ->
         let mutable userInput = []
         
-        System.Console.Clear()
-        
-        printfn "Your board so far:"
+        printfn "\nYour board so far:"
         
         for i = 0 to board.Length-1 do
             printfn "%A" (board.[i])
@@ -178,9 +184,12 @@ let gamePlay hiddenCode =
     let mutable blackPegs : int = 0
     let mutable tries : int = 0
     while snd (validation) <> 4 do
+        System.Console.Clear()
+
+        printfn "You have used %d guesses so far." tries
+        
         humanGuess <- guess Human board
         
-        //printf "%d: " tries
         validation <- (validate hiddenCode humanGuess)
         
         
@@ -195,7 +204,7 @@ let gamePlay hiddenCode =
     
 
 let rec game choice = 
-    let win player choice1 guessC tries = 
+    let rec win player choice1 guessC tries = 
         match player with
         | "Human" -> 
             System.Console.Clear()
@@ -203,7 +212,7 @@ let rec game choice =
             printfn "It took you %d guesses!" tries
 
         | _ -> 
-            printfn "The computer wins!"
+            printfn "\nThe computer wins!"
             printfn "It took it %d guesses!" guessC
             
         printfn "\nWould you like to:"
@@ -217,22 +226,177 @@ let rec game choice =
         | "1" -> game "0"
         | "2" -> game choice1 
         | "3" -> System.Environment.Exit 1
-        | _ ->
-            printfn "Wrong input, you will be taken to the startpage..."
-            let p = System.Console.ReadLine()
-            game "0"
+        | _ -> win player choice1 guessC tries
 
-    (*let mutable board : board = []
-    let mutable humanInput = []
-    let mutable humanGuess : code = [Red]
-    let mutable validation = (0,0)
-    let mutable whitePegs : int = 0
-    let mutable blackPegs : int = 0
-    let mutable tries : int = 10*)
+    let compGuess hiddenCode gameC =
+        //Gættet
+        let mutable guessCode : code = []
+         
+        // All of these variables will be used, no matter the game mode
+        let board : board = []
+        let mutable validation = (0,0)
+        let mutable whitePegs : int = 0
+        let mutable blackPegs : int = 0
+
+        let temp = (Array.init 6 (fun _ -> 0))
+        
+        //Første 6 gæt 
+        let mutable whiteCounter = 0
+        let mutable n = 0
+        let mutable i = 0
+        let colors = [Red; Green; Yellow; Purple; White; Black]
+        while (whiteCounter < 4) && (n < 6) do
+            guessCode <- [colors.[n]; colors.[n]; colors.[n]; colors.[n]]
+            temp.[i] <- snd (validate hiddenCode [colors.[n]; colors.[n];
+                                                  colors.[n]; colors.[n]])
+            whiteCounter <- whiteCounter + temp.[i]
+            n <- n + 1
+            i <- i + 1
+        
+        
+        
+        //Histogram til gæt 
+        guessCode <- []
+        for i=0 to 5 do
+            while temp.[i] > 0 do
+                guessCode <- List.append guessCode [colors.[i]]
+                temp.[i] <- temp.[i] - 1
+        
+        //Black validate 
+        let mutable blacks = 
+            guessCount <- guessCount - 1
+            blacksValidate <- 1
+            snd (validate hiddenCode guessCode)
             
+        blacksValidate <- 0
+        
+        if blacks = 4 then
+            let mutable s = 0
+            for i = 0 to 5 do
+                if guessCode.[0..3] = [colors.[i]; colors.[i]; colors.[i]; colors.[i]] then
+                    s <- s + 1
+                else ()     
+            if s = 0 then
+                validate hiddenCode guessCode |> ignore
+            else ()
+        else ()
+        
+        //Tjekker antal sorte og gætter
+        let rec compRearrange guess =
+            match blacks with
+            | 4 -> 
+                win "Comp" gameC guessCount 0
+            | 2 ->
+                guessCode <- [guessCode.[3]] @ guessCode.[1..2] @ [guessCode.[0]]
+                // Bliver til 4 2 3 1 
+                blacks <- snd (validate hiddenCode guessCode)
+        
+                match blacks with
+                | 4 -> 
+                    win "Comp" gameC guessCount 0
+                | 2 ->
+                    if guessCode.[0] = guessCode.[2] && guessCode.[1] = guessCode.[3] then
+                        guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
+                        blacks <- snd (validate hiddenCode guessCode)
+                        if blacks = 4 then
+                            win "Comp" gameC guessCount 0
+                        else
+                            guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]]
+                            blacks <- snd (validate hiddenCode guessCode)
+                            win "Comp" gameC guessCount 0
+                    elif guessCode.[0] = guessCode.[2] then
+                        guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
+                        blacks <- snd (validate hiddenCode guessCode)
+                        win "Comp" gameC guessCount 0
+                    else
+                        guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ guessCode.[2..3]
+                        blacks <- snd (validate hiddenCode guessCode)
+                        win "Comp" gameC guessCount 0
+                | 0 ->
+                    guessCode <- List.rev guessCode
+                    blacks <- snd (validate hiddenCode guessCode)
+                    win "Comp" gameC guessCount 0
+                | 1 ->
+                    guessCode <- [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[3]] @ [guessCode.[0]]
+                    // Bliver til 3 2 1 4
+                    blacks <- snd (validate hiddenCode guessCode)
+                    match blacks with
+                    | 4 -> 
+                        win "Comp" gameC guessCount 0
+                    | 0 ->
+                        guessCode <- [guessCode.[2]] @ [guessCode.[3]] @ [guessCode.[0]] @ [guessCode.[1]]
+                        // Bliver til 1 4 3 2
+                        blacks <- snd (validate hiddenCode guessCode)
+                        win "Comp" gameC guessCount 0
+                    | 1 ->
+                        guessCode <- [guessCode.[1]] @ [guessCode.[2]] @ [guessCode.[0]] @ [guessCode.[3]]
+                        // Bliver til 2 1 3 4
+                        blacks <- snd (validate hiddenCode guessCode)
+                        match blacks with
+                        | 4 -> 
+                            win "Comp" gameC guessCount 0
+                        | 2 -> 
+                            guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
+                            win "Comp" gameC guessCount 0
+                        | 0 ->
+                            guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]]
+                            // Bliver til 1 2 4 3
+                            blacks <- snd (validate hiddenCode guessCode)
+                            win "Comp" gameC guessCount 0
+                        | _ -> printfn "Nej"
+                    | _ -> printfn "Hej"
+                | _ -> printfn "Hej"
+            | 1 ->
+                guessCode <- [guessCode.[3]] @ guessCode.[1..2] @ [guessCode.[0]]
+                // Bliver til 4 2 3 1
+                blacks <- snd (validate hiddenCode guessCode)
+                match blacks with
+                | 2 -> compRearrange guessCode
+                | 1 ->
+                    if guessCode.[0] = guessCode.[2] then
+                        guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[1]] @ [guessCode.[2]]
+                        blacks <- snd (validate hiddenCode guessCode)
+                        win "Comp" gameC guessCount 0
+                    else
+                        guessCode <- [guessCode.[1]] @ [guessCode.[2]] @ [guessCode.[0]] @ [guessCode.[3]]
+                        blacks <- snd (validate hiddenCode guessCode)
+                        win "Comp" gameC guessCount 0
+                | 0 ->
+                    guessCode <- [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[0]]
+                    compRearrange guessCode 
+                | _ -> printfn "Hej"
+        
+            | 0 ->
+                guessCode <- guessCode.[3] :: guessCode.[0..2]
+                // Bliver til 4 1 2 3
+                blacks <- snd (validate hiddenCode guessCode)
+                match blacks with
+                | 4 -> 
+                    win "Comp" gameC guessCount 0
+                | 1 ->  
+                    if guessCode.[0] = guessCode.[3] then 
+                        guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[1]] @ [guessCode.[2]]
+                        blacks <- snd (validate hiddenCode guessCode)
+                        //bliver til 4 3 1 2 
+                        win "Comp" gameC guessCount 0
+                    else 
+                        compRearrange guessCode
+                | 2 ->
+                    if guessCode.[0] = guessCode.[3] then 
+                        guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]]
+                        blacks <- snd (validate hiddenCode guessCode)
+                        //bliver til 4 3 2 1
+                        win "Comp" gameC guessCount 0
+                    else 
+                        compRearrange guessCode
+                | 0 ->
+                    compRearrange guessCode
+                | _ -> printfn "hej"
+            | _ -> printfn "hej"
+        compRearrange guessCode
+
     if choice = "0" then        
         //Startpage
-        // All of these variables will be used, no matter the game mode
        
         System.Console.Clear()
 
@@ -295,14 +459,6 @@ let rec game choice =
     
     elif choice = "1" then
         //Human vs Computer
-        // All of these variables will be used, no matter the game mode
-        (*let mutable board : board = []
-        let mutable humanInput = []
-        let mutable humanGuess : code = [Red]
-        let mutable validation = (0,0)
-        let mutable whitePegs : int = 0
-        let mutable blackPegs : int = 0
-        let mutable tries : int = 10*)
        
         System.Console.Clear()
 
@@ -315,42 +471,11 @@ let rec game choice =
         printf "Press ENTER to begin playing..."
         let p = System.Console.ReadLine()
          
-        (*while tries > 0 do
-            if tries <= 3 then
-                if tries = 1 then
-                    printfn "\nYou only have 1 guess left. Be sure to make it count\n"
-                else
-                    printfn "\nYou only have %d guesses left. Be sure to make them count\n" tries*)
-        
-        
-        
-            (*humanGuess <- guess Human board
-        
-            validation <- (validate hiddenCode humanGuess)
-        
-         
-        
-            whitePegs <- (fst validation)
-            blackPegs <- (snd validation)
-            
-            board <- board @ [(humanGuess, validation)]
-
-            if (snd validation) = 4 then*)
         let k = gamePlay hiddenCode
         win "Human" "1" 0 k  
-        
-            (*tries <- tries - 1*)
     
     elif choice = "2" then
         //Human vs Human
-        // All of these variables will be used, no matter the game mode
-        (*let mutable board : board = []
-        let mutable humanInput = []
-        let mutable humanGuess : code = [Red]
-        let mutable validation = (0,0)
-        let mutable whitePegs : int = 0
-        let mutable blackPegs : int = 0
-        let mutable tries : int = 10*)
         
         System.Console.Clear()
 
@@ -362,76 +487,11 @@ let rec game choice =
         printf "Press ENTER to give control to player 2..."
         let p = System.Console.ReadLine()
         
-        (*while tries > 0 do
-            if tries <= 3 then
-                if tries = 1 then
-                    printfn "\nYou only have 1 guess left. Be sure to make it count\n"
-                else
-                    printfn "\nYou only have %d guesses left. Be sure to make them count\n" tries
-       
-
-
-            humanGuess <- guess Human board
-        
-            validation <- (validate hiddenCode humanGuess)
-        
-         
-        
-            whitePegs <- (fst validation)
-            blackPegs <- (snd validation)
-
-            board <- board @ [(humanGuess, validation)]
-            
-            if (snd validation) = 4 then
-                win "Human" "2" 0 *)
         let k = gamePlay hiddenCode
         win "Human" "2" 0 k 
         
     elif choice = "3" then
         //Computer vs Human
-        let mutable guessCount = 0
-        
-        //Gættet
-        let mutable guessCode : code = []
-        
-        let validate1 (hidden : code) (guess : code) i : answer =
-            let histoHidden = makeHisto hidden
-            let histoGuess = makeHisto guess
-            
-            let rec minHisto hiddenHisto guessHisto =
-                match (hiddenHisto, guessHisto) with
-                | (x :: xs, y :: ys) -> (min x y) :: minHisto xs ys
-                | ([], _) -> [0]
-                | _ -> failwith "hej"
-            
-            let sumPegs = List.sum (minHisto histoHidden histoGuess)
-            
-            let rec blackFun hidden guess =
-                match (hidden, guess) with
-                | (x :: xs, y :: ys) ->
-                                    if x = y then
-                                        1 + blackFun xs ys
-                                    else
-                                        0 + blackFun xs ys
-                | ([], _) -> 0
-                | _ -> failwith "hej"
-        
-            let blackPegs = blackFun hidden guess
-            let whitePegs = sumPegs - blackPegs
-            
-            if i = 1 then
-                guessCount <- guessCount + 1
-                printfn "%d:  %A" guessCount guessCode
-            else ()
-            
-            (whitePegs, blackPegs)
-        
-        // All of these variables will be used, no matter the game mode
-        let board : board = []
-        let mutable validation = (0,0)
-        let mutable whitePegs : int = 0
-        let mutable blackPegs : int = 0
-        
         System.Console.Clear()
         printfn "Computer vs Human, with human acting as \"codemaker\""
 
@@ -442,203 +502,10 @@ let rec game choice =
         let p = System.Console.ReadLine()
         let k = System.Console.Clear()
 
-        let temp = [|0;0;0;0;0;0|]
-        
-        //Første 6 gæt 
-        let mutable whiteCounter = 0
-        let mutable n = 0
-        let mutable i = 0
-        let colors = [Red; Green; Yellow; Purple; White; Black]
-        while (whiteCounter < 4) && (n < 6) do
-            guessCode <- [colors.[n]; colors.[n]; colors.[n]; colors.[n]]
-            temp.[i] <- snd (validate1 hiddenCode [colors.[n]; colors.[n];
-                                                  colors.[n]; colors.[n]] 1)
-            whiteCounter <- whiteCounter + temp.[i]
-            n <- n + 1
-            i <- i + 1
-        
-        
-        
-        //Histogram til gæt 
-        guessCode <- []
-        for i=0 to 5 do
-            while temp.[i] > 0 do
-                guessCode <- List.append guessCode [colors.[i]]
-                temp.[i] <- temp.[i] - 1
-        
-        //Black validate 
-        let mutable blacks = snd (validate1 hiddenCode guessCode 0)
-        
-        if blacks = 4 then
-            validate1 hiddenCode guessCode 1 |> ignore
-        else
-            validate1 hiddenCode guessCode 0 |> ignore
-
-        (*//7. gæt 
-        if n = 6 && guessCode <> [Black; Black; Black; Black] then 
-                blacks <- (snd (validate1 hiddenCode guessCode 1))
-                n <- n + 1
-             else ()*)
-       
-        //Tjekker antal sorte og gætter
-        let rec foo guess =
-            match blacks with
-            | 4 -> 
-                win "Comp" "3" guessCount 0
-            | 2 ->
-                guessCode <- [guessCode.[3]] @ guessCode.[1..2] @ [guessCode.[0]]
-                // Bliver til 4 2 3 1 
-                blacks <- snd (validate1 hiddenCode guessCode 1)
-        
-                match blacks with
-                | 4 -> 
-                    win "Comp" "3" guessCount 0
-                | 2 ->
-                    if guessCode.[0] = guessCode.[2] && guessCode.[1] = guessCode.[3] then
-                        guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        if blacks = 4 then
-                            win "Comp" "3" guessCount 0
-                        else
-                            guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]]
-                            blacks <- snd (validate1 hiddenCode guessCode 1)
-                            win "Comp" "3" guessCount 0
-                    elif guessCode.[0] = guessCode.[2] then
-                        guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "3" guessCount 0
-                    else
-                        guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ guessCode.[2..3]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "3" guessCount 0
-                | 0 ->
-                    guessCode <- List.rev guessCode
-                    blacks <- snd (validate1 hiddenCode guessCode 1)
-                    win "Comp" "3" guessCount 0
-                | 1 ->
-                    guessCode <- [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[3]] @ [guessCode.[0]]
-                    // Bliver til 3 2 1 4
-                    blacks <- snd (validate1 hiddenCode guessCode 1)
-                    match blacks with
-                    | 4 -> 
-                        win "Comp" "3" guessCount 0
-                    | 0 ->
-                        guessCode <- [guessCode.[2]] @ [guessCode.[3]] @ [guessCode.[0]] @ [guessCode.[1]]
-                        // Bliver til 1 4 3 2
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "3" guessCount 0
-                    | 1 ->
-                        guessCode <- [guessCode.[1]] @ [guessCode.[2]] @ [guessCode.[0]] @ [guessCode.[3]]
-                        // Bliver til 2 1 3 4
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        match blacks with
-                        | 4 -> 
-                            win "Comp" "3" guessCount 0
-                        | 2 -> 
-                            guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
-                            win "Comp" "3" guessCount 0
-                        | 0 ->
-                            guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]]
-                            // Bliver til 1 2 4 3
-                            blacks <- snd (validate1 hiddenCode guessCode 1)
-                            win "Comp" "3" guessCount 0
-                        | _ -> printfn "Nej"
-                    | _ -> printfn "Hej"
-                | _ -> printfn "Hej"
-            | 1 ->
-                guessCode <- [guessCode.[3]] @ guessCode.[1..2] @ [guessCode.[0]]
-                // Bliver til 4 2 3 1
-                blacks <- snd (validate1 hiddenCode guessCode 1)
-                match blacks with
-                | 2 -> foo guessCode
-                | 1 ->
-                    if guessCode.[0] = guessCode.[2] then
-                        guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[1]] @ [guessCode.[2]]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "3" guessCount 0
-                    else
-                        guessCode <- [guessCode.[1]] @ [guessCode.[2]] @ [guessCode.[0]] @ [guessCode.[3]]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "3" guessCount 0
-                | 0 ->
-                    guessCode <- [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[0]]
-                    foo guessCode 
-                | _ -> printfn "Hej"
-        
-            | 0 ->
-                guessCode <- guessCode.[3] :: guessCode.[0..2]
-                // Bliver til 4 1 2 3
-                blacks <- snd (validate1 hiddenCode guessCode 1)
-                match blacks with
-                | 4 -> 
-                    win "Comp" "3" guessCount 0
-                | 1 ->  
-                    if guessCode.[0] = guessCode.[3] then 
-                        guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[1]] @ [guessCode.[2]]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        //bliver til 4 3 1 2 
-                        win "Comp" "3" guessCount 0
-                    else 
-                        foo guessCode
-                | 2 ->
-                    if guessCode.[0] = guessCode.[3] then 
-                        guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        //bliver til 4 3 2 1
-                        win "Comp" "3" guessCount 0
-                    else 
-                        foo guessCode
-                | 0 ->
-                    foo guessCode
-                | _ -> printfn "hej"
-            | _ -> printfn "hej"
-        foo guessCode
+        compGuess hiddenCode "3"
 
     else
         //Computer vs Computer
-        let mutable guessCount = 0
-        
-        //Gættet
-        let mutable guessCode : code = []
-        
-        let validate1 (hidden : code) (guess : code) i : answer =
-            let histoHidden = makeHisto hidden
-            let histoGuess = makeHisto guess
-            
-            let rec minHisto hiddenHisto guessHisto =
-                match (hiddenHisto, guessHisto) with
-                | (x :: xs, y :: ys) -> (min x y) :: minHisto xs ys
-                | ([], _) -> [0]
-                | _ -> failwith "hej"
-            
-            let sumPegs = List.sum (minHisto histoHidden histoGuess)
-            
-            let rec blackFun hidden guess =
-                match (hidden, guess) with
-                | (x :: xs, y :: ys) ->
-                                    if x = y then
-                                        1 + blackFun xs ys
-                                    else
-                                        0 + blackFun xs ys
-                | ([], _) -> 0
-                | _ -> failwith "hej"
-        
-            let blackPegs = blackFun hidden guess
-            let whitePegs = sumPegs - blackPegs
-           
-            if i = 1 then
-                guessCount <- guessCount + 1
-                printfn "%d:  %A" guessCount guessCode
-            else ()
-
-            (whitePegs, blackPegs)
-        
-        // All of these variables will be used, no matter the game mode
-        let board : board = []
-        let mutable validation = (0,0)
-        let mutable whitePegs : int = 0
-        let mutable blackPegs : int = 0
-        
         System.Console.Clear()
         
         printfn "You chose the game mode Computer vs Computer"
@@ -651,155 +518,6 @@ let rec game choice =
         let p = System.Console.ReadLine()
         let k = System.Console.Clear()
        
-        let temp = [|0;0;0;0;0;0|]
-        
-        //Første 6 gæt 
-        let mutable whiteCounter = 0
-        let mutable n = 0
-        let mutable i = 0
-        let colors = [Red; Green; Yellow; Purple; White; Black]
-        while (whiteCounter < 4) && (n < 6) do
-            guessCode <- [colors.[n]; colors.[n]; colors.[n]; colors.[n]]
-            temp.[i] <- snd (validate1 hiddenCode [colors.[n]; colors.[n];
-                                                  colors.[n]; colors.[n]] 1)
-            whiteCounter <- whiteCounter + temp.[i]
-            n <- n + 1
-            i <- i + 1
-        
-        
-        //Histogram til gæt 
-        guessCode <- []
-        for i=0 to 5 do
-            while temp.[i] > 0 do
-                guessCode <- List.append guessCode [colors.[i]]
-                temp.[i] <- temp.[i] - 1
-        
-        //Black validate 
-        let mutable blacks = snd (validate1 hiddenCode guessCode 0)
-        
-        if blacks = 4 then
-            validate1 hiddenCode guessCode 1 |> ignore
-        else
-            validate1 hiddenCode guessCode 0 |> ignore
-
-        (*//7. gæt 
-        if n = 6 && guessCode <> [Black; Black; Black; Black] then 
-                blacks <- (snd (validate1 hiddenCode guessCode 1))
-                n <- n + 1
-             else ()*)
-        
-        //Tjekker antal sorte og gætter
-        let rec foo guess =
-            match blacks with
-            | 4 -> 
-                win "Comp" "4" guessCount 0
-            | 2 ->
-                guessCode <- [guessCode.[3]] @ guessCode.[1..2] @ [guessCode.[0]]
-                // Bliver til 4 2 3 1 
-                blacks <- snd (validate1 hiddenCode guessCode 1)
-        
-                match blacks with
-                | 4 -> 
-                    win "Comp" "4" guessCount 0
-                | 2 ->
-                    if guessCode.[0] = guessCode.[2] && guessCode.[1] = guessCode.[3] then
-                        guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        if blacks = 4 then
-                            win "Comp" "4" guessCount 0
-                        else
-                            guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]]
-                            blacks <- snd (validate1 hiddenCode guessCode 1)
-                            win "Comp" "4" guessCount 0
-                    elif guessCode.[0] = guessCode.[2] then
-                        guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "4" guessCount 0
-                    else
-                        guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ guessCode.[2..3]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "4" guessCount 0
-                | 0 ->
-                    guessCode <- List.rev guessCode
-                    blacks <- snd (validate1 hiddenCode guessCode 1)
-                    win "Comp" "4" guessCount 0
-                | 1 ->
-                    guessCode <- [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[3]] @ [guessCode.[0]]
-                    // Bliver til 3 2 1 4
-                    blacks <- snd (validate1 hiddenCode guessCode 1)
-                    match blacks with
-                    | 4 -> 
-                        win "Comp" "4" guessCount 0
-                    | 0 ->
-                        guessCode <- [guessCode.[2]] @ [guessCode.[3]] @ [guessCode.[0]] @ [guessCode.[1]]
-                        // Bliver til 1 4 3 2
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "4" guessCount 0
-                    | 1 ->
-                        guessCode <- [guessCode.[1]] @ [guessCode.[2]] @ [guessCode.[0]] @ [guessCode.[3]]
-                        // Bliver til 2 1 3 4
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        match blacks with
-                        | 4 -> 
-                            win "Comp" "4" guessCount 0
-                        | 2 -> 
-                            guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
-                            win "Comp" "4" guessCount 0
-                        | 0 ->
-                            guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]]
-                            // Bliver til 1 2 4 3
-                            blacks <- snd (validate1 hiddenCode guessCode 1)
-                            win "Comp" "4" guessCount 0
-                        | _ -> printfn "Hej"
-                    | _ -> printfn "hej"
-                | _ -> printfn "hej"
-            | 1 ->
-                guessCode <- [guessCode.[3]] @ guessCode.[1..2] @ [guessCode.[0]]
-                // Bliver til 4 2 3 1
-                blacks <- snd (validate1 hiddenCode guessCode 1)
-                match blacks with
-                | 2 -> foo guessCode
-                | 1 ->
-                    if guessCode.[0] = guessCode.[2] then
-                        guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[1]] @ [guessCode.[2]]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "4" guessCount 0
-                    else
-                        guessCode <- [guessCode.[1]] @ [guessCode.[2]] @ [guessCode.[0]] @ [guessCode.[3]]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        win "Comp" "4" guessCount 0
-                | 0 ->
-                    guessCode <- [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[0]]
-                    foo guessCode 
-                | _ -> printfn "Hej"
-        
-            | 0 ->
-                guessCode <- guessCode.[3] :: guessCode.[0..2]
-                // Bliver til 4 1 2 3
-                blacks <- snd (validate1 hiddenCode guessCode 1)
-                match blacks with
-                | 4 -> 
-                    win "Comp" "4" guessCount 0
-                | 1 ->  
-                    if guessCode.[0] = guessCode.[3] then 
-                        guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[1]] @ [guessCode.[2]]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        //bliver til 4 3 1 2 
-                        win "Comp" "4" guessCount 0
-                    else 
-                        foo guessCode
-                | 2 ->
-                    if guessCode.[0] = guessCode.[3] then 
-                        guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]]
-                        blacks <- snd (validate1 hiddenCode guessCode 1)
-                        //bliver til 4 3 2 1 
-                        win "Comp" "4" guessCount 0
-                    else 
-                        foo guessCode
-                | 0 ->
-                    foo guessCode
-                | _ -> printfn "hej"
-            | _ -> printfn "hej"
-        foo guessCode
+        compGuess hiddenCode "4"
 
 game "0"
