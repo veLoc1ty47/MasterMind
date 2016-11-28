@@ -177,20 +177,32 @@ let mutable blacksValidate = 0
 /// (int * int). Det første element i tuplen er antallet af hvide pinde, og det
 /// andet element i tuplen er antallet af sorte pinde.</returns>
 let validate (hidden : code) (guess : code) : answer =
+    // Dette er de to variable som lagrer histogrammerne for den skjulte kode
+    // og brugerens/computerens gæt.
     let histoHidden = makeHisto hidden
     let histoGuess = makeHisto guess
     
+    // Her sammenligner men de to histogrammer. Summen af pinde (hvide + sorte
+    // pinde) regne ved at finde min(hiddenHisto[i], guessHisto[i]) for 
+    // i = 0,1,2,..5
     let rec minHisto hiddenHisto guessHisto =
         match (hiddenHisto, guessHisto) with
         | (x :: xs, y :: ys) -> (min x y) :: minHisto xs ys
         | ([], _) -> []
-        | _ -> failwith "hej"
+        | _ -> failwith "Kommer ikke til at ske"
     
+    // sumPegs indeholder summen af hvide og sorte pinde
     let sumPegs = List.sum (minHisto histoHidden histoGuess)
     
+    // Antallet af sorte pinde findes med blackFun funktionen.
+    // For i = 0,1,2,3, hvis hidden[i] = guess[i] er den i'te pind den rigtige
+    // farve på det rigtige sted.
+    // funktionen returnerer et heltal mellem 0 og 4, begge inklusive.
     let rec blackFun hidden guess =
         match (hidden, guess) with
         | (x :: xs, y :: ys) ->
+                            // Hvis hidden[i] og guess[i] er samme farve,
+                            // skal der returneres en mere sort pind.
                             if x = y then
                                 1 + blackFun xs ys
                             else
@@ -198,14 +210,22 @@ let validate (hidden : code) (guess : code) : answer =
         | ([], _) -> 0
         | _ -> failwith "hej"
 
+    // blackPegs betegner antallet af sorte pinde.
     let blackPegs = blackFun hidden guess
+
+    // Antallet af hvide pinde kan regnes som summen af sorte og hvide pinde
+    // minus antallet af sorte pinde.
     let whitePegs = sumPegs - blackPegs
 
+    // Holder styr på hvor mange gæt man har brugt.
     guessCount <- guessCount + 1
+
+
     if blacksValidate = 0 then
         printfn "%d:  %A" guessCount guess
     else ()
     
+    // Returnerer en tuple med antallet af hvide- og sorte pinde.
     (whitePegs, blackPegs)
 
 let playersInputCorrect number =
