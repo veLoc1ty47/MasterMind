@@ -1,8 +1,6 @@
 // POP opgave 8 - Mastermind i F#
 // Skrevet af Asibi Ayagiba, Mads Carstensen og Andreas Drivsholm
 
-
-
 // De præfinerede typer vi skal bruge i vores kode.
 type codeColor = 
     Red | Green | Yellow | Purple | White | Black
@@ -30,12 +28,28 @@ let charToColor (color : string)  =
     | "B" | "b" -> Black
     | _ -> failwith "Kommer ikke til at ske."
 
+/// <summary>inputCode oversætter en liste af bogstaver som definerer farver
+/// til en liste af egentlige farver, altså er typen codeColor</summary>
+/// <params>Tager et input koden som paramterer</params>
+/// <returns>Returnerer en liste af typen code som er defineret som værende
+/// en liste med elementer af typen codeColor.</returns>
 let rec inputCodeToCode inputCode : code =
     match inputCode with
     | [] -> []
     | x :: xs -> charToColor x :: inputCodeToCode xs
 
-let randomCode () : code = 
+
+/// <summary>Genererer en tilfældig kode. Bliver brugt når computer fungerer
+/// som opgavestilleren.</summary>
+/// <remarks>Opretter et nyt object rand, som er defineret ved klassen Random.
+/// Vi bruger klassens metode Next() til at generere tal mellem 1 og 6, med
+/// begge tal inklusive. Vi skriver Next(1,7), men her er syvtallet eksklusivt.
+/// </remarks>
+/// <params>Denne funktion tager inten parametre</params>
+/// <returns>Returnerer en en "kode". Det er en liste af 4 elementer, hvor
+/// hvert element er af typen codeColor. Denne liste af farver er tilfældige
+/// </returns>
+let randomCode : code = 
     let rand = new System.Random() 
 
     let rec randomCodeHelper (random : System.Random) acc =
@@ -50,10 +64,10 @@ let randomCode () : code =
             | 4 -> Purple :: (randomCodeHelper random (acc-1)) 
             | 5 -> White  :: (randomCodeHelper random (acc-1)) 
             | 6 -> Black  :: (randomCodeHelper random (acc-1)) 
-            | _ -> failwith "Hej"
+            | _ -> failwith "Kommer ikke til at ske."
         | 0 ->
             []
-        | _ -> failwith "Hej"
+        | _ -> failwith "Kommer ikke til at ske."
 
     (randomCodeHelper rand 4)
 
@@ -78,7 +92,7 @@ let userCode (code : string list) =
 let makeCode (player : player) : code =
     match player with
     | Computer ->
-        randomCode ()
+        randomCode
     | Human -> 
         let mutable inputCode = []
         printfn "\nPlease create a secret code."
@@ -192,11 +206,8 @@ let guess (player : player) (board : board) : code =
 
 let gamePlay hiddenCode =
     let mutable board : board = []
-    let mutable humanInput = []
     let mutable humanGuess : code = [Red]
     let mutable validation = (0,0)
-    let mutable whitePegs : int = 0
-    let mutable blackPegs : int = 0
     let mutable tries : int = 0
     while snd (validation) <> 4 do
         System.Console.Clear()
@@ -207,10 +218,6 @@ let gamePlay hiddenCode =
         
         validation <- (validate hiddenCode humanGuess)
         
-        
-        
-        whitePegs <- (fst validation)
-        blackPegs <- (snd validation)
         
         board <- board @ [(humanGuess, validation)]
 
