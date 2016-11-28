@@ -139,7 +139,15 @@ let makeCode (player : player) : code =
         let code = inputCodeToCode inputCode
         code
 
-let makeHisto (code : codeColor list) =
+/// <summary>makeHisto laver et histo gram over en liste af farver. Lad
+/// i = 1,2,3...6. Histo.[i] indeholde en heltal for hvor ofte farve i
+/// forekommer. Talværdien for farven og selv farven, hører sammen som
+/// de blev defineret øverst i programkoden. Så 0 = Red, 1 = Green, etc.
+/// </summary>
+/// <params>makeHisto tager et parameter af typen code</params>
+/// <returns>makeHisto returnerer et histogram af farverne for den pågældende
+/// liste</returns>
+let makeHisto (code : code) =
     let histo = (Array.init 6 (fun _ -> 0))
 
     for i = 0 to code.Length - 1 do
