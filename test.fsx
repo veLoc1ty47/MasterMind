@@ -71,6 +71,11 @@ let randomCode : code =
 
     (randomCodeHelper rand 4)
 
+
+/// <summary>Denne funktion tjekker om brugerens input er korrekt.</summary>
+/// <params>Den tager et parameter af typen code</params>
+/// <returns>Returnerer et bools true eller false, alt efter om brugerens
+/// input er hhv. korrekt eller ikke korrekt.</returns>
 let userCode (code : string list) =
     let legitColor col =
         match col with
@@ -89,12 +94,21 @@ let userCode (code : string list) =
 
         returnValue
     
+/// <summary>makeCode genererer en kode af typen code.</summary>
+/// <remarks>Funktionen har to branches, alt afhængig om det er computeren
+/// der fungerer som "codemaker" eller om det er en bruger.</remarks>
+/// <params>Tager som parameter en spiller type som kan være enten Human eller
+/// Computer</params>
+/// <returns>Returnerer en kode af typen code</summary>
 let makeCode (player : player) : code =
     match player with
+    // Hvis "codemaker" er Computer, bliver funktionen randomCode kaldt.
+    // randomCode returnerer en kode af typen code.
     | Computer ->
         randomCode
+    // Hvis "codemaker" er Human, bliver denne branch kørt.
     | Human -> 
-        let mutable inputCode = []
+        let mutable inputCode = [] // variabel til at indeholde brugerens input
         printfn "\nPlease create a secret code."
         printfn "You can choose from the following colors:"
         printfn "Red, Green, Yellow, Purple, White and Black"
@@ -104,14 +118,24 @@ let makeCode (player : player) : code =
         printfn "Example: r g y b"
         printf "\n> "
         
+        // inputCode sættes til at være lige med brugerens input.
+        // Brugerens input består af 4 tegn separeret af mellemrum. Disse tegn
+        // bliver udvindet af tekststrengen ved hjælpe af metoden Split, som
+        // forårsager at inputet bliver omdannet til en liste af tegn.
+        // Denne liste gemmes i den muterbare liste inputCode.
         inputCode <- Array.toList ((System.Console.ReadLine ()).Split(' '))
         
+        // Funktionen userCode tjekker om brugeren input er korrekt.
+        // Hvis inputtet ikke er korrekt, spørges der om nyt input.
         while (userCode inputCode) = false do
             printfn "\nYou have to choose a valid color"
             printf  "\n> "
 
             inputCode <- Array.toList ((System.Console.ReadLine ()).Split(' '))
         
+        // Når inputtet er korrekt, kaldes funktionen inputCodeToCode med
+        // inputCode som argument. Dette konverterer koden fra at være en liste
+        // af tegn, til at være en liste af typen code.
         let code = inputCodeToCode inputCode
         code
 
