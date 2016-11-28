@@ -316,9 +316,44 @@ let gamePlay hiddenCode =
 
         tries <- tries + 1
     tries
-    
+
+/// <summary>game funktionen er "main" funktionen i vores program. Den fungerer
+/// ved at den kalder sig selv når der skal startes et nyt spil - derfor er den
+/// rekursivt defineret.</summary>
+/// <params>funktionen tager et parameter choice. Choice fortæller hvilket
+/// game mode der skal spilles. choice kan antage følgende værdier:
+///   0: Startskræm
+///   1: Human vs. Computer, hvor computer som "codemaker"
+///   2: Human vs. Human
+///   3: Computer vs. Human, hvor brugeren fungerer som "codemaker"
+///   4: Computer vs Computer
+/// </params>
+
 let rec game choice = 
-    let rec win player choice1 guessC tries = 
+
+    /// <summary>Win funktionen bliver kaldt når enten brugeren eller computer
+    /// har gættet rigtigt, og derfor vundet spillet.</summary>
+    /// <params>Win tager 4 parametre</params>
+    /// <param name="player">
+    ///   Parameteret player bruges til at afgøre om det er en bruger eller
+    ///   computeren som har vundet.
+    /// </param>
+    /// <param name="gameModeChoice">
+    ///   Parameteret gameModeChoice bruges til at finde ud af hvilket gamemode
+    ///   brugeren/computer spillede da han/hun/den vandt. Dette bliver brugt
+    ///   når man skal spille igen, for så kalder man game med dette parameter,
+    ///   hvis man ønsker at spille samme game mode igen.
+    /// </param>
+    /// <param name="guessC">
+    ///   guessC er hvor mange gæt computeren har brugt
+    /// </param>
+    /// <param name="tries">
+    ///   tries er hvor mange gæt brugeren har brugt.
+    /// </param>
+    /// <returns>Returneringsvædien afhænger af hvad brugeren taster ind
+    /// efter overstået spil</returns>
+
+    let rec win player gameModeChoice guessC tries = 
         match player with
         | "Human" -> 
             System.Console.Clear()
@@ -337,16 +372,19 @@ let rec game choice =
         let userInput = System.Console.ReadLine ()
    
         match userInput with
-        | "1" -> game "0"
-        | "2" -> game choice1 
-        | "3" -> System.Environment.Exit 1
-        | _ -> win player choice1 guessC tries
+        | "1" -> game "0" // Her ledes brugeren tilbage til startskærmen
+        | "2" -> game gameModeChoice // Her spilles det samme game mode igen
+        | "3" -> System.Environment.Exit 0 // Her afsluttes spillet
+
+        // Her kalder funktionen sig selv, med de nuværende parametre som
+        // argumenter. Den gør dette i stedet for en fejlmeddelelse, og
+        // spørger så brugeren igen om hvad han/hun vil.
+        | _ -> win player gameModeChoice guessC tries
 
     let compGuess hiddenCode gameC =
         //Gættet
         let mutable guessCode : code = []
          
-        // All of these variables will be used, no matter the game mode
         let board : board = []
         let mutable validation = (0,0)
         let mutable whitePegs : int = 0
@@ -582,8 +620,8 @@ let rec game choice =
         printf "Press ENTER to begin playing..."
         let p = System.Console.ReadLine()
          
-        let k = gamePlay hiddenCode
-        win "Human" "1" 0 k  
+        let humanNumberOfTries = gamePlay hiddenCode
+        win "Human" "1" 0 humanNumberOfTries
     
     elif choice = "2" then
         //Human vs Human
@@ -598,8 +636,8 @@ let rec game choice =
         printf "Press ENTER to give control to player 2..."
         let p = System.Console.ReadLine()
         
-        let k = gamePlay hiddenCode
-        win "Human" "2" 0 k 
+        let humanNumberOfTries = gamePlay hiddenCode
+        win "Human" "2" 0 humanNumberOfTries
         
     elif choice = "3" then
         //Computer vs Human
