@@ -169,6 +169,13 @@ let makeHisto (code : code) =
 let mutable guessCount = 0
 let mutable blacksValidate = 0
 
+/// <summary>validate validerer om hvor tæt computerens eller brugerens gæt er
+/// på at være det rigtige - i form af hvide og sorte pinde.</summary>
+/// <params>Tager to parametre. hidden er en den skjulte kode, og guess er den
+/// kode som computer eller brugeren har gættet</params>
+/// <returns>Returnerer en tuple af typen answer som er en tuple af typen
+/// (int * int). Det første element i tuplen er antallet af hvide pinde, og det
+/// andet element i tuplen er antallet af sorte pinde.</returns>
 let validate (hidden : code) (guess : code) : answer =
     let histoHidden = makeHisto hidden
     let histoGuess = makeHisto guess
@@ -486,8 +493,7 @@ let rec game choice =
             printfn "                       W B"
             printfn "R B W W                1 1"
             printfn "When your guess has 4 black pegs, it means your are guessed"
-            printfn "the secret code, and won the game. But be clever, you only"
-            printfn "have 10 tries to guess the secret code!\n"
+            printfn "the secret code, and won the game."
             printfn "Now there is really only one thing left, who is to play?"
 
         printfn "\n"
