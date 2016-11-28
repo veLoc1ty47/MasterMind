@@ -245,12 +245,26 @@ let playersInputCorrectStartScreen input =
         true
     | _ ->
         false
-
+/// <summary>Funktionen guess tager mod et brugergæt og returnerer en
+/// kode</summary>
+/// <remarks>Funktionen har et parameter af typen player, så den både
+/// kan tage gæt fra en bruger og et computer. Dette stod der i opgaven
+/// at den skulle. Men gættet fra computeren bliver lavet et andet sted
+/// i koden, og derfor matcher player altid med Human og aldrig med
+/// Computer. Vi satte bare Computer branchen til at returnerer en liste
+/// med farven Red, da guess skal returnere en variable af typen code
+/// </remarks>
+/// <params>guess har to parametere. Player er af typen player, og bliver brugt
+/// til at finde ud af om gættet kommer fra en computer eller en bruger. board
+/// er af typen board, og tager variable af typen board. Board er en liste med
+/// elementer som har typen (code * answer).</params>
+/// <returns>guess returnerer en kode hvis brugerinputtet er korrekt</returns>
 let guess (player : player) (board : board) : code =
     match player with
     | Human ->
         let mutable userInput = []
         
+        // Printer spillebrættet indeholdende tidliger gæt og dets svarpinde.
         printfn "\nYour board so far:"
         
         for i = 0 to board.Length-1 do
@@ -260,6 +274,7 @@ let guess (player : player) (board : board) : code =
         
         userInput <- Array.toList (System.Console.ReadLine().Split(' '))
         
+        // validerer bruger input
         while (userCode userInput) = false do
             printfn "\nInvalid input\n"
             printf  "> "
@@ -269,27 +284,39 @@ let guess (player : player) (board : board) : code =
     | Computer ->
         [Red]
 
+/// <summary>Funktioen gamePlay kører indtil brugeren har gættet rigtigt
+/// </summary>
+/// <remarks>Funktionen kører kun når det er brugeren der fungerer som
+/// kodeløser</remarks>
+/// <params>Tager som parameter hiddenCode af typen code. Den bruger dette
+/// parameter til at sammeligne de gæt der bliver lavet med den hemmelige
+/// kode, så den ved hvornår den skal terminere</params>
+/// <returns>Returnerer et heltal med hvor mange forsøg brugeren har brugt på
+/// at gætte koden.</returns>
 let gamePlay hiddenCode =
     let mutable board : board = []
     let mutable humanGuess : code = [Red]
     let mutable validation = (0,0)
     let mutable tries : int = 0
+
+    // Det er først når validate returnerer (0,4) (Når der er 4 sorte pinde)
+    // at løkken terminerer, og brugeren har vundet spillet.
     while snd (validation) <> 4 do
         System.Console.Clear()
 
+        // Printer hvor mange gæt man har brugt indtil videre.
         printfn "You have used %d guesses so far." tries
         
         humanGuess <- guess Human board
         
         validation <- (validate hiddenCode humanGuess)
         
-        
+        // Spillebrættet bliver opdateret med det nye gæt
         board <- board @ [(humanGuess, validation)]
 
         tries <- tries + 1
     tries
     
-
 let rec game choice = 
     let rec win player choice1 guessC tries = 
         match player with
