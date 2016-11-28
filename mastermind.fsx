@@ -1,8 +1,6 @@
 // POP opgave 8 - Mastermind i F#
 // Skrevet af Asibi Ayagiba, Mads Carstensen og Andreas Drivsholm
 
-module mastermind
-
 // De præfinerede typer vi skal bruge i vores kode.
 type codeColor = 
     Red | Green | Yellow | Purple | White | Black
