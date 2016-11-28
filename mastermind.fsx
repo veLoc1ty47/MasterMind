@@ -238,7 +238,7 @@ let playersInputCorrect number =
     | "1" | "2" | "3" | "4" -> true
     | _ -> false
 
-// Tjekker om 
+// Tjekker om brugeren vælger et gyldigt valg på den første velkomstskærmen.
 let playersInputCorrectStartScreen input =
     match input with
     | "help" | "Help" | "start" | "Start" ->
