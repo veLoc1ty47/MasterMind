@@ -228,10 +228,15 @@ let validate (hidden : code) (guess : code) : answer =
     // Returnerer en tuple med antallet af hvide- og sorte pinde.
     (whitePegs, blackPegs)
 
+// Tjekker om brugerens på starsiden er korrekt.
+// Brugeren bliver bedt om at vælge et af de fire game modes. Hvis brugeren
+// indtaster noget andet, vil han/hun få at vide han/hun skal vælge et tal
+// mellem 1 og 4
 let playersInputCorrect number =
     match number with
     | "1" | "2" | "3" | "4" -> true
     | _ -> false
+
 
 let playersInputCorrectStartScreen input =
     match input with
