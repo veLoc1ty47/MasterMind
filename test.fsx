@@ -1,3 +1,9 @@
+// POP opgave 8 - Mastermind i F#
+// Skrevet af Asibi Ayagiba, Mads Carstensen og Andreas Drivsholm
+
+
+
+// De præfinerede typer vi skal bruge i vores kode.
 type codeColor = 
     Red | Green | Yellow | Purple | White | Black
 type code = codeColor list
@@ -5,6 +11,15 @@ type answer = int * int
 type board = (code * answer) list
 type player = Human | Computer
 
+/// <summary>Denne funktion sørger for at få konverteret et bogstav om til
+/// den passende farve.</summary>
+/// <remarks>Wildcardet bliver aldrig matchet, da denne funktion altid
+/// bliver kaldt med enten "R", "r", "G", etc, pga hjælpefunktionen
+/// legitColors sørger for at input altid bliver tjekket inden det bliver
+/// kaldt som argument til charToColor</remarks>
+/// <params>charToColor tager et parameter med navnet color som er af typen
+/// string</params>
+/// <returns>charToColor returnerer en farve af typen codeColor</returns>
 let charToColor (color : string)  =
     match color with
     | "R" | "r" -> Red
@@ -13,7 +28,7 @@ let charToColor (color : string)  =
     | "P" | "p" -> Purple
     | "W" | "w" -> White
     | "B" | "b" -> Black
-    | _ -> failwith "Nej"
+    | _ -> failwith "Kommer ikke til at ske."
 
 let rec inputCodeToCode inputCode : code =
     match inputCode with
