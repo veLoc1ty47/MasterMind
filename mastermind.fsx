@@ -487,6 +487,10 @@ let rec game choice =
                     match blacks with
                     | 4 -> 
                         win "Comp" gameC guessCount 0
+                    | 2 -> 
+                        guessCode <- [guessCode.[0]] @ [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[3]]
+                        blacks <- snd (validate hiddenCode guessCode)
+                        win "Comp" gameC guessCount 0
                     | 0 ->
                         guessCode <- [guessCode.[2]] @ [guessCode.[3]] @ [guessCode.[0]] @ [guessCode.[1]]
                         // Bliver til 1 4 3 2
