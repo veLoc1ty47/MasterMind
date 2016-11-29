@@ -515,7 +515,18 @@ let rec game choice =
                 // Bliver til 4 2 3 1
                 blacks <- snd (validate hiddenCode guessCode)
                 match blacks with
-                | 2 -> compRearrange guessCode
+                | 2 -> 
+                    if guessCode.[0] = guessCode.[2] then
+                        guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ guessCode.[2..3]
+                        blacks <- snd (validate hiddenCode guessCode)
+                        if blacks = 4 then
+                            win "Comp" gameC guessCount 0
+                        else
+                            guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]]
+                            blacks <- snd (validate hiddenCode guessCode)
+                            win "Comp" gameC guessCount 0
+                    else
+                        compRearrange guessCode
                 | 1 ->
                     if guessCode.[0] = guessCode.[2] then
                         guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[1]] @ [guessCode.[2]]
