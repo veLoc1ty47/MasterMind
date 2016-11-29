@@ -49,7 +49,7 @@ let rec inputCodeToCode inputCode : code =
 /// <returns>Returnerer en en "kode". Det er en liste af 4 elementer, hvor
 /// hvert element er af typen codeColor. Denne liste af farver er tilfældige
 /// </returns>
-let randomCode : code = 
+let randomCode () : code = 
     let rand = new System.Random() 
 
     let rec randomCodeHelper (random : System.Random) acc =
@@ -105,7 +105,7 @@ let makeCode (player : player) : code =
     // Hvis "codemaker" er Computer, bliver funktionen randomCode kaldt.
     // randomCode returnerer en kode af typen code.
     | Computer ->
-        randomCode
+        randomCode ()
     // Hvis "codemaker" er Human, bliver denne branch kørt.
     | Human -> 
         let mutable inputCode = [] // variabel til at indeholde brugerens input
@@ -381,6 +381,10 @@ let rec game choice =
         // spørger så brugeren igen om hvad han/hun vil.
         | _ -> win player gameModeChoice guessC tries
 
+    /// <summary>Funktionen compGuess bliver kaldt når det er computeren der
+    /// skal løse en kode</summary>
+    /// <params>compGuess tager to parametre. hiddehCode den skjulte kode, og
+    /// gameC: hvilket game mode det er</params>
     let compGuess hiddenCode gameC =
         //Gættet
         let mutable guessCode : code = []
@@ -393,6 +397,8 @@ let rec game choice =
         let temp = (Array.init 6 (fun _ -> 0))
         
         //Første 6 gæt 
+        // Hvis koden består af fire ens farver, gætter kan det gætte det på
+        // i+1 gæt, hvis koden har værdi i, hvor Red = 0, Green = 1, etc.
         let mutable whiteCounter = 0
         let mutable n = 0
         let colors = [Red; Green; Yellow; Purple; White; Black]
