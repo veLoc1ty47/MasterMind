@@ -245,6 +245,7 @@ let playersInputCorrectStartScreen input =
         true
     | _ ->
         false
+
 /// <summary>Funktionen guess tager mod et brugergæt og returnerer en
 /// kode</summary>
 /// <remarks>Funktionen har et parameter af typen player, så den både
@@ -320,40 +321,31 @@ let gamePlay hiddenCode =
 /// <summary>game funktionen er "main" funktionen i vores program. Den fungerer
 /// ved at den kalder sig selv når der skal startes et nyt spil - derfor er den
 /// rekursivt defineret.</summary>
-/// <params>funktionen tager et parameter choice. Choice fortæller hvilket
+/// <param name="choice">Choice fortæller hvilket
 /// game mode der skal spilles. choice kan antage følgende værdier:
-///   0: Startskræm
+///   0: Startskærm
 ///   1: Human vs. Computer, hvor computer som "codemaker"
 ///   2: Human vs. Human
 ///   3: Computer vs. Human, hvor brugeren fungerer som "codemaker"
 ///   4: Computer vs Computer
-/// </params>
-
+/// </param>
 let rec game choice = 
 
     /// <summary>Win funktionen bliver kaldt når enten brugeren eller computer
     /// har gættet rigtigt, og derfor vundet spillet.</summary>
-    /// <params>Win tager 4 parametre</params>
-    /// <param name="player">
-    ///   Parameteret player bruges til at afgøre om det er en bruger eller
-    ///   computeren som har vundet.
-    /// </param>
+    /// <param name="player">Parameteret player bruges til at afgøre om det er en bruger eller
+    /// computeren som har vundet.</param>
     /// <param name="gameModeChoice">
-    ///   Parameteret gameModeChoice bruges til at finde ud af hvilket gamemode
-    ///   brugeren/computer spillede da han/hun/den vandt. Dette bliver brugt
-    ///   når man skal spille igen, for så kalder man game med dette parameter,
-    ///   hvis man ønsker at spille samme game mode igen.
+    /// Parameteret gameModeChoice bruges til at finde ud af hvilket gamemode
+    /// brugeren/computer spillede da han/hun/den vandt. Dette bliver brugt
+    /// når man skal spille igen, for så kalder man game med dette parameter,
+    /// hvis man ønsker at spille samme game mode igen.
     /// </param>
-    /// <param name="guessC">
-    ///   guessC er hvor mange gæt computeren har brugt
-    /// </param>
-    /// <param name="tries">
-    ///   tries er hvor mange gæt brugeren har brugt.
-    /// </param>
+    /// <param name="guessC">guessC er hvor mange gæt computeren har brugt</param>
+    /// <param name="tries">tries er hvor mange gæt brugeren har brugt.</param>
     /// <returns>Returneringsvædien afhænger af hvad brugeren taster ind
     /// efter overstået spil</returns>
-
-    let rec win player gameModeChoice guessC tries = 
+    let rec win player gameModeChoice guessCounter tries = 
         match player with
         | "Human" -> 
             System.Console.Clear()
@@ -361,11 +353,11 @@ let rec game choice =
             printfn "It took you %d guesses!" tries
 
         | _ -> 
-            printfn "\nThe computer wins!"
-            printfn "It took it %d guesses!" guessC
+            printfn "\nThe computer, Allan, wins!"
+            printfn "It took it %d guesses!" guessCounter
             
         printfn "\nWould you like to:"
-        printfn "1. Go to the startpage?"
+        printfn "1. Go to the startmenu?"
         printfn "2. Play the same gamemode again?"
         printfn "3. Quit the game?"
         printf "> "
@@ -379,31 +371,35 @@ let rec game choice =
         // Her kalder funktionen sig selv, med de nuværende parametre som
         // argumenter. Den gør dette i stedet for en fejlmeddelelse, og
         // spørger så brugeren igen om hvad han/hun vil.
-        | _ -> win player gameModeChoice guessC tries
+        | _ -> win player gameModeChoice guessCounter tries
 
     /// <summary>Funktionen compGuess bliver kaldt når det er computeren der
     /// skal løse en kode</summary>
-    /// <params>compGuess tager to parametre. hiddehCode den skjulte kode, og
-    /// gameC: hvilket game mode det er</params>
-    let compGuess hiddenCode gameC =
-        //Gættet
+    /// <param name="hiddenCode">Opgaven der skal løses</param>
+    /// <param name="gameChoice">Hvilken gamemode der bliver kaldt fra. Bruges til at spille samme type
+    /// igen fra winskærm</param>
+    /// <remarks>Funktionen køres kun når computeren skal gætte</remarks>
+    let compGuess hiddenCode gameChoice =
+        //Variable der bruges under funktionen
         let mutable guessCode : code = []
-         
-        let board : board = []
         let mutable validation = (0,0)
         let mutable whitePegs : int = 0
         let mutable blackPegs : int = 0
-
+        //Laver en variabel med 6 elementer, der alle er 0'er.
         let temp = (Array.init 6 (fun _ -> 0))
         
         //Første 6 gæt 
-        // Hvis koden består af fire ens farver, gætter kan det gætte det på
+        // Hvis koden består af fire ens farver, kan programmet gætte det på
         // i+1 gæt, hvis koden har værdi i, hvor Red = 0, Green = 1, etc.
         let mutable whiteCounter = 0
         let mutable n = 0
         let colors = [Red; Green; Yellow; Purple; White; Black]
+        //Laver gæt med samme farve på alle pladser, en farve af gangen
         while (whiteCounter < 4) && (n < 6) do
             guessCode <- [colors.[n]; colors.[n]; colors.[n]; colors.[n]]
+            //Midlertidigt histogram der bruges til at sammensætte 7. gæt. Indsætter tal svarende
+            //til hvor mange sorte stifter der modtages som respons på gæt på plads svarende til
+            //farvenummer
             temp.[n] <- snd (validate hiddenCode [colors.[n]; colors.[n];
                                                   colors.[n]; colors.[n]])
             whiteCounter <- whiteCounter + temp.[n]
@@ -411,37 +407,50 @@ let rec game choice =
         
         
         
-        //Histogram til gæt 
+        //Sammensætter 7. gæt 
         guessCode <- []
         for i = 0 to 5 do
             while temp.[i] > 0 do
                 guessCode <- List.append guessCode [colors.[i]]
                 temp.[i] <- temp.[i] - 1
         
-        //Black validate 
+        //Tjekker hvor mange sorte der gives som respons på sammensatte 7. gæt. 
+        //Hvis opgaven er den samme farve på alle 4 pladser, vil programmet bruge et ekstra
+        //gæt, selvom den har det rigtige gæt. Derfor ændrer vi variablen blacksValidate, som gør at
+        //guessCount ikke tæller op når den er forskellig fra 0.
         let mutable blacks = 
             guessCount <- guessCount - 1
             blacksValidate <- 1
             snd (validate hiddenCode guessCode)
-            
+        
+        //Ændrer den tilbage så gæt tæller op igen ved hver validate
         blacksValidate <- 0
         
         if blacks = 4 then
             let mutable s = 0
+            //Hvis alle farverne er den samme, bruges der ikke et gæt.
             for i = 0 to 5 do
                 if guessCode.[0..3] = [colors.[i]; colors.[i]; colors.[i]; colors.[i]] then
                     s <- s + 1
                 else ()     
+            //Men hvis opgaven nu er [Red; Red; Green; Green] vil programmet have den efter andet
+            //gæt. Den skal dog stadig bruge et gæt på rent faktisk at gætte på netop det.
             if s = 0 then
+                //Bruges udelukkende for at bruge et gæt
                 validate hiddenCode guessCode |> ignore
             else ()
-        else ()
+        else
+            blacks <- snd (validate hiddenCode guessCode)
         
-        //Tjekker antal sorte og gætter
+        /// <summary>Tjekker antal sorte og omrokerer farverne i positionerne</summary>
+        /// <param name="guess">Bruges når programmet kaldes rekursivt til have gemme nuværende
+        /// værdi af guessCode</param>
+        /// <returns>Kalder win funktionen hvis der gives 4 sorte stifter som respons, ellers
+        /// omrokerer den farver</returns>
         let rec compRearrange guess =
             match blacks with
             | 4 -> 
-                win "Comp" gameC guessCount 0
+                win "Comp" gameChoice guessCount 0
             | 2 ->
                 guessCode <- [guessCode.[3]] @ guessCode.[1..2] @ [guessCode.[0]]
                 // Bliver til 4 2 3 1 
@@ -449,78 +458,93 @@ let rec game choice =
         
                 match blacks with
                 | 4 -> 
-                    win "Comp" gameC guessCount 0
+                    win "Comp" gameChoice guessCount 0
                 | 2 ->
                     if guessCode.[0] = guessCode.[2] && guessCode.[1] = guessCode.[3] then
                         guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
                         blacks <- snd (validate hiddenCode guessCode)
                         if blacks = 4 then
-                            win "Comp" gameC guessCount 0
+                            win "Comp" gameChoice guessCount 0
                         else
                             guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]]
                             blacks <- snd (validate hiddenCode guessCode)
-                            win "Comp" gameC guessCount 0
+                            win "Comp" gameChoice guessCount 0
                     elif guessCode.[0] = guessCode.[2] then
                         guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
                         blacks <- snd (validate hiddenCode guessCode)
-                        win "Comp" gameC guessCount 0
+                        win "Comp" gameChoice guessCount 0
                     else
                         guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ guessCode.[2..3]
                         blacks <- snd (validate hiddenCode guessCode)
-                        win "Comp" gameC guessCount 0
+                        win "Comp" gameChoice guessCount 0
                 | 0 ->
                     guessCode <- List.rev guessCode
                     blacks <- snd (validate hiddenCode guessCode)
-                    win "Comp" gameC guessCount 0
+                    win "Comp" gameChoice guessCount 0
                 | 1 ->
                     guessCode <- [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[3]] @ [guessCode.[0]]
                     // Bliver til 3 2 1 4
                     blacks <- snd (validate hiddenCode guessCode)
                     match blacks with
                     | 4 -> 
-                        win "Comp" gameC guessCount 0
+                        win "Comp" gameChoice guessCount 0
+                    | 2 -> 
+                        guessCode <- [guessCode.[0]] @ [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[3]]
+                        blacks <- snd (validate hiddenCode guessCode)
+                        win "Comp" gameChoice guessCount 0
                     | 0 ->
                         guessCode <- [guessCode.[2]] @ [guessCode.[3]] @ [guessCode.[0]] @ [guessCode.[1]]
                         // Bliver til 1 4 3 2
                         blacks <- snd (validate hiddenCode guessCode)
-                        win "Comp" gameC guessCount 0
+                        win "Comp" gameChoice guessCount 0
                     | 1 ->
                         guessCode <- [guessCode.[1]] @ [guessCode.[2]] @ [guessCode.[0]] @ [guessCode.[3]]
                         // Bliver til 2 1 3 4
                         blacks <- snd (validate hiddenCode guessCode)
                         match blacks with
                         | 4 -> 
-                            win "Comp" gameC guessCount 0
+                            win "Comp" gameChoice guessCount 0
                         | 2 -> 
                             guessCode <- guessCode.[0..1] @ [guessCode.[3]] @ [guessCode.[2]]
-                            win "Comp" gameC guessCount 0
+                            win "Comp" gameChoice guessCount 0
                         | 0 ->
                             guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]]
                             // Bliver til 1 2 4 3
                             blacks <- snd (validate hiddenCode guessCode)
-                            win "Comp" gameC guessCount 0
-                        | _ -> printfn "Nej"
-                    | _ -> printfn "Hej"
-                | _ -> printfn "Hej"
+                            win "Comp" gameChoice guessCount 0
+                        | _ -> printfn "Fejl på 2. indre"
+                    | _ -> printfn "Fejl på 2. midt"
+                | _ -> printfn "Fejl på 2. ydre"
             | 1 ->
                 guessCode <- [guessCode.[3]] @ guessCode.[1..2] @ [guessCode.[0]]
                 // Bliver til 4 2 3 1
                 blacks <- snd (validate hiddenCode guessCode)
                 match blacks with
-                | 2 -> compRearrange guessCode
+                | 2 -> 
+                    if guessCode.[0] = guessCode.[2] then
+                        guessCode <- [guessCode.[1]] @ [guessCode.[0]] @ guessCode.[2..3]
+                        blacks <- snd (validate hiddenCode guessCode)
+                        if blacks = 4 then
+                            win "Comp" gameChoice guessCount 0
+                        else
+                            guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]]
+                            blacks <- snd (validate hiddenCode guessCode)
+                            win "Comp" gameChoice guessCount 0
+                    else
+                        compRearrange guessCode
                 | 1 ->
                     if guessCode.[0] = guessCode.[2] then
                         guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[1]] @ [guessCode.[2]]
                         blacks <- snd (validate hiddenCode guessCode)
-                        win "Comp" gameC guessCount 0
+                        win "Comp" gameChoice guessCount 0
                     else
                         guessCode <- [guessCode.[1]] @ [guessCode.[2]] @ [guessCode.[0]] @ [guessCode.[3]]
                         blacks <- snd (validate hiddenCode guessCode)
-                        win "Comp" gameC guessCount 0
+                        win "Comp" gameChoice guessCount 0
                 | 0 ->
                     guessCode <- [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[0]]
                     compRearrange guessCode 
-                | _ -> printfn "Hej"
+                | _ -> printfn "Fejl på 1."
         
             | 0 ->
                 guessCode <- guessCode.[3] :: guessCode.[0..2]
@@ -528,13 +552,13 @@ let rec game choice =
                 blacks <- snd (validate hiddenCode guessCode)
                 match blacks with
                 | 4 -> 
-                    win "Comp" gameC guessCount 0
+                    win "Comp" gameChoice guessCount 0
                 | 1 ->  
                     if guessCode.[0] = guessCode.[3] then 
                         guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[1]] @ [guessCode.[2]]
                         blacks <- snd (validate hiddenCode guessCode)
                         //bliver til 4 3 1 2 
-                        win "Comp" gameC guessCount 0
+                        win "Comp" gameChoice guessCount 0
                     else 
                         compRearrange guessCode
                 | 2 ->
@@ -542,17 +566,17 @@ let rec game choice =
                         guessCode <- [guessCode.[0]] @ [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]]
                         blacks <- snd (validate hiddenCode guessCode)
                         //bliver til 4 3 2 1
-                        win "Comp" gameC guessCount 0
+                        win "Comp" gameChoice guessCount 0
                     else 
                         compRearrange guessCode
                 | 0 ->
                     compRearrange guessCode
-                | _ -> printfn "hej"
-            | _ -> printfn "hej"
+                | _ -> printfn "Fejl på 0."
+            | _ -> printfn "Fejl på ydre"
         compRearrange guessCode
 
     if choice = "0" then        
-        //Startpage
+        //Startskærm
        
         System.Console.Clear()
 
@@ -565,6 +589,7 @@ let rec game choice =
 
         let mutable userInputStartScreen = System.Console.ReadLine ()
 
+        //Indtil brugeren skriver enten help eller start, kommer man ikke videre
         while (playersInputCorrectStartScreen userInputStartScreen) = false do
             printfn "\nPlease enter either \"help\" or \"start\"\n"
             printf  ">"
@@ -604,12 +629,13 @@ let rec game choice =
         
         let mutable playersInput = System.Console.ReadLine ()
         
+        //Indtil man skriver tal mellem 1 og 4 kommer man ikke videre
         while (playersInputCorrect playersInput) = false do
             printfn "\nYou have to choose a number between 1 and 4\n"
             printf  "> "
 
             playersInput <- System.Console.ReadLine ()
-        
+        //Kalder spilfunktion rekursivt med indtastede tal som argument 
         game playersInput
     
     elif choice = "1" then
@@ -620,13 +646,17 @@ let rec game choice =
         printfn "You chose the game mode Human vs Computer, where the computer"
         printfn "acts as the \"codemaker\""
         
+        //Opgaven generes automatisk med et kald til makeCode og gemmes i variablen hiddenCode
         let hiddenCode = makeCode Computer
         
         printfn "\nThe computer has now generated a code.\n"
         printf "Press ENTER to begin playing..."
         let p = System.Console.ReadLine()
          
+        //Kalder funktionen gamePlay der først terminerer når opgaven er løst
         let humanNumberOfTries = gamePlay hiddenCode
+        //Kalder win funktionen. Giver den player, hvilken spiltype der lige blev spillet og hvor
+        //mange forsøg det tog.
         win "Human" "1" 0 humanNumberOfTries
     
     elif choice = "2" then
@@ -636,23 +666,29 @@ let rec game choice =
 
         printfn "You chose the game mode Human vs Human"
         
+        //Opgaven laves ved et kald til makeCode og gemmes i variablen hiddenCode
         let hiddenCode = makeCode Human
         
         printfn "\nCode accepted.\n"
         printf "Press ENTER to give control to player 2..."
         let p = System.Console.ReadLine()
         
+        //Kalder funktionen gamePlay der først terminerer når opgaven er løst
         let humanNumberOfTries = gamePlay hiddenCode
+        //Kalder win funktionen. Giver den player, hvilken spiltype der lige blev spillet og hvor
+        //mange forsøg det tog.
         win "Human" "2" 0 humanNumberOfTries
         
     elif choice = "3" then
         //Computer vs Human
+        //guessCount skal nulstilles da det er en global variabel
         guessCount <- 0
 
         System.Console.Clear()
         
         printfn "Computer vs Human, with human acting as \"codemaker\""
 
+        //Opgaven laves ved et kald til makeCode og gemmes i variablen hiddenCode
         let hiddenCode = makeCode Human
         
         printfn "\nCode accepted.\n"
@@ -660,16 +696,20 @@ let rec game choice =
         let p = System.Console.ReadLine()
         let k = System.Console.Clear()
 
+        //Funktionen compGuess kaldes med opgaven og spiltypen. Den terminerer først når opgaven er
+        //løst, og win kaldes videre fra den.
         compGuess hiddenCode "3"
 
     else
         //Computer vs Computer
+        //guessCount skal nulstilles da det er en global variabel
         guessCount <- 0
 
         System.Console.Clear()
         
         printfn "You chose the game mode Computer vs Computer"
         
+        //Opgaven generes automatisk med et kald til makeCode og gemmes i variablen hiddenCode
         let hiddenCode = makeCode Computer
         
         printfn "\nThe computer has now generated a code.\n"
@@ -678,6 +718,8 @@ let rec game choice =
         let p = System.Console.ReadLine()
         let k = System.Console.Clear()
        
+        //Funktionen compGuess kaldes med opgaven og spiltypen. Den terminerer først når opgaven er
+        //løst, og win kaldes videre fra den.
         compGuess hiddenCode "4"
 
 game "0"
