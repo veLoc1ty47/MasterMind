@@ -353,7 +353,7 @@ let rec game choice =
             printfn "It took you %d guesses!" tries
 
         | _ -> 
-            printfn "\nThe computer wins!"
+            printfn "\nThe computer, Allan, wins!"
             printfn "It took it %d guesses!" guessC
             
         printfn "\nWould you like to:"
