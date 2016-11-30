@@ -1,7 +1,7 @@
 // POP opgave 8 - Mastermind i F#
 // Skrevet af Asibi Ayagiba, Mads Carstensen og Andreas Drivsholm
 
-// De præfinerede typer vi skal bruge i vores kode.
+// De praefinerede typer vi skal bruge i vores kode.
 type codeColor = 
     Red | Green | Yellow | Purple | White | Black
 type code = codeColor list
@@ -9,11 +9,11 @@ type answer = int * int
 type board = (code * answer) list
 type player = Human | Computer
 
-/// <summary>Denne funktion sørger for at få konverteret et bogstav om til
+/// <summary>Denne funktion soerger for at faa konverteret et bogstav om til
 /// den passende farve.</summary>
 /// <remarks>Wildcardet bliver aldrig matchet, da denne funktion altid
-/// bliver kaldt med enten "R", "r", "G", etc, pga hjælpefunktionen
-/// legitColors sørger for at input altid bliver tjekket inden det bliver
+/// bliver kaldt med enten "R", "r", "G", etc, pga hjaelpefunktionen
+/// legitColors soerger for at input altid bliver tjekket inden det bliver
 /// kaldt som argument til charToColor</remarks>
 /// <params>charToColor tager et parameter med navnet color som er af typen
 /// string</params>
@@ -28,10 +28,10 @@ let charToColor (color : string)  =
     | "B" | "b" -> Black
     | _ -> failwith "Kommer ikke til at ske."
 
-/// <summary>inputCode oversætter en liste af bogstaver som definerer farver
-/// til en liste af egentlige farver, altså er typen codeColor</summary>
+/// <summary>inputCode oversaetter en liste af bogstaver som definerer farver
+/// til en liste af egentlige farver, altsaa er typen codeColor</summary>
 /// <params>Tager et input koden som paramterer</params>
-/// <returns>Returnerer en liste af typen code som er defineret som værende
+/// <returns>Returnerer en liste af typen code som er defineret som vaerende
 /// en liste med elementer af typen codeColor.</returns>
 let rec inputCodeToCode inputCode : code =
     match inputCode with
@@ -39,7 +39,7 @@ let rec inputCodeToCode inputCode : code =
     | x :: xs -> charToColor x :: inputCodeToCode xs
 
 
-/// <summary>Genererer en tilfældig kode. Bliver brugt når computer fungerer
+/// <summary>Genererer en tilfaeldig kode. Bliver brugt naar computer fungerer
 /// som opgavestilleren.</summary>
 /// <remarks>Opretter et nyt object rand, som er defineret ved klassen Random.
 /// Vi bruger klassens metode Next() til at generere tal mellem 1 og 6, med
@@ -47,7 +47,7 @@ let rec inputCodeToCode inputCode : code =
 /// </remarks>
 /// <params>Denne funktion tager inten parametre</params>
 /// <returns>Returnerer en en "kode". Det er en liste af 4 elementer, hvor
-/// hvert element er af typen codeColor. Denne liste af farver er tilfældige
+/// hvert element er af typen codeColor. Denne liste af farver er tilfaeldige
 /// </returns>
 let randomCode () : code = 
     let rand = new System.Random() 
@@ -95,9 +95,9 @@ let userCode (code : string list) =
         returnValue
     
 /// <summary>makeCode genererer en kode af typen code.</summary>
-/// <remarks>Funktionen har to branches, alt afhængig om det er computeren
+/// <remarks>Funktionen har to branches, alt afhaengig om det er computeren
 /// der fungerer som "codemaker" eller om det er en bruger.</remarks>
-/// <params>Tager som parameter en spiller type som kan være enten Human eller
+/// <params>Tager som parameter en spiller type som kan vaere enten Human eller
 /// Computer</params>
 /// <returns>Returnerer en kode af typen code</summary>
 let makeCode (player : player) : code =
@@ -106,7 +106,7 @@ let makeCode (player : player) : code =
     // randomCode returnerer en kode af typen code.
     | Computer ->
         randomCode ()
-    // Hvis "codemaker" er Human, bliver denne branch kørt.
+    // Hvis "codemaker" er Human, bliver denne branch koert.
     | Human -> 
         let mutable inputCode = [] // variabel til at indeholde brugerens input
         printfn "\nPlease create a secret code."
@@ -118,34 +118,34 @@ let makeCode (player : player) : code =
         printfn "Example: r g y b"
         printf "\n> "
         
-        // inputCode sættes til at være lige med brugerens input.
-        // Brugerens input består af 4 tegn separeret af mellemrum. Disse tegn
-        // bliver udvindet af tekststrengen ved hjælpe af metoden Split, som
-        // forårsager at inputet bliver omdannet til en liste af tegn.
+        // inputCode saettes til at vaere lige med brugerens input.
+        // Brugerens input bestaar af 4 tegn separeret af mellemrum. Disse tegn
+        // bliver udvindet af tekststrengen ved hjaelpe af metoden Split, som
+        // foraarsager at inputet bliver omdannet til en liste af tegn.
         // Denne liste gemmes i den muterbare liste inputCode.
         inputCode <- Array.toList ((System.Console.ReadLine ()).Split(' '))
         
         // Funktionen userCode tjekker om brugeren input er korrekt.
-        // Hvis inputtet ikke er korrekt, spørges der om nyt input.
+        // Hvis inputtet ikke er korrekt, spoerges der om nyt input.
         while (userCode inputCode) = false do
             printfn "\nYou have to choose a valid color"
             printf  "\n> "
 
             inputCode <- Array.toList ((System.Console.ReadLine ()).Split(' '))
         
-        // Når inputtet er korrekt, kaldes funktionen inputCodeToCode med
-        // inputCode som argument. Dette konverterer koden fra at være en liste
-        // af tegn, til at være en liste af typen code.
+        // Naar inputtet er korrekt, kaldes funktionen inputCodeToCode med
+        // inputCode som argument. Dette konverterer koden fra at vaere en liste
+        // af tegn, til at vaere en liste af typen code.
         let code = inputCodeToCode inputCode
         code
 
 /// <summary>makeHisto laver et histo gram over en liste af farver. Lad
 /// i = 1,2,3...6. Histo.[i] indeholde en heltal for hvor ofte farve i
-/// forekommer. Talværdien for farven og selv farven, hører sammen som
-/// de blev defineret øverst i programkoden. Så 0 = Red, 1 = Green, etc.
+/// forekommer. Talvaerdien for farven og selv farven, hoerer sammen som
+/// de blev defineret oeverst i programkoden. Saa 0 = Red, 1 = Green, etc.
 /// </summary>
 /// <params>makeHisto tager et parameter af typen code</params>
-/// <returns>makeHisto returnerer et histogram af farverne for den pågældende
+/// <returns>makeHisto returnerer et histogram af farverne for den paagaeldende
 /// liste</returns>
 let makeHisto (code : code) =
     let histo = (Array.init 6 (fun _ -> 0))
@@ -169,16 +169,16 @@ let makeHisto (code : code) =
 let mutable guessCount = 0
 let mutable blacksValidate = 0
 
-/// <summary>validate validerer om hvor tæt computerens eller brugerens gæt er
-/// på at være det rigtige - i form af hvide og sorte pinde.</summary>
+/// <summary>validate validerer om hvor taet computerens eller brugerens gaet er
+/// paa at vaere det rigtige - i form af hvide og sorte pinde.</summary>
 /// <params>Tager to parametre. hidden er en den skjulte kode, og guess er den
-/// kode som computer eller brugeren har gættet</params>
+/// kode som computer eller brugeren har gaettet</params>
 /// <returns>Returnerer en tuple af typen answer som er en tuple af typen
-/// (int * int). Det første element i tuplen er antallet af hvide pinde, og det
+/// (int * int). Det foerste element i tuplen er antallet af hvide pinde, og det
 /// andet element i tuplen er antallet af sorte pinde.</returns>
 let validate (hidden : code) (guess : code) : answer =
     // Dette er de to variable som lagrer histogrammerne for den skjulte kode
-    // og brugerens/computerens gæt.
+    // og brugerens/computerens gaet.
     let histoHidden = makeHisto hidden
     let histoGuess = makeHisto guess
     
@@ -196,7 +196,7 @@ let validate (hidden : code) (guess : code) : answer =
     
     // Antallet af sorte pinde findes med blackFun funktionen.
     // For i = 0,1,2,3, hvis hidden[i] = guess[i] er den i'te pind den rigtige
-    // farve på det rigtige sted.
+    // farve paa det rigtige sted.
     // funktionen returnerer et heltal mellem 0 og 4, begge inklusive.
     let rec blackFun hidden guess =
         match (hidden, guess) with
@@ -217,7 +217,7 @@ let validate (hidden : code) (guess : code) : answer =
     // minus antallet af sorte pinde.
     let whitePegs = sumPegs - blackPegs
 
-    // Holder styr på hvor mange gæt man har brugt.
+    // Holder styr paa hvor mange gaet man har brugt.
     guessCount <- guessCount + 1
 
 
@@ -228,17 +228,17 @@ let validate (hidden : code) (guess : code) : answer =
     // Returnerer en tuple med antallet af hvide- og sorte pinde.
     (whitePegs, blackPegs)
 
-// Tjekker om brugeren har valgt det rigtige input når han/hun skal vælge
+// Tjekker om brugeren har valgt det rigtige input naar han/hun skal vaelge
 // game mode.
-// Brugeren bliver bedt om at vælge et af de fire game modes. Hvis brugeren
-// indtaster noget andet, vil han/hun få at vide han/hun skal vælge et tal
+// Brugeren bliver bedt om at vaelge et af de fire game modes. Hvis brugeren
+// indtaster noget andet, vil han/hun faa at vide han/hun skal vaelge et tal
 // mellem 1 og 4
 let playersInputCorrect number =
     match number with
     | "1" | "2" | "3" | "4" -> true
     | _ -> false
 
-// Tjekker om brugeren vælger et gyldigt valg på den første velkomstskærmen.
+// Tjekker om brugeren vaelger et gyldigt valg paa den foerste velkomstskaermen.
 let playersInputCorrectStartScreen input =
     match input with
     | "help" | "Help" | "start" | "Start" ->
@@ -246,17 +246,17 @@ let playersInputCorrectStartScreen input =
     | _ ->
         false
 
-/// <summary>Funktionen guess tager mod et brugergæt og returnerer en
+/// <summary>Funktionen guess tager mod et brugergaet og returnerer en
 /// kode</summary>
-/// <remarks>Funktionen har et parameter af typen player, så den både
-/// kan tage gæt fra en bruger og et computer. Dette stod der i opgaven
-/// at den skulle. Men gættet fra computeren bliver lavet et andet sted
+/// <remarks>Funktionen har et parameter af typen player, saa den baade
+/// kan tage gaet fra en bruger og et computer. Dette stod der i opgaven
+/// at den skulle. Men gaettet fra computeren bliver lavet et andet sted
 /// i koden, og derfor matcher player altid med Human og aldrig med
 /// Computer. Vi satte bare Computer branchen til at returnerer en liste
 /// med farven Red, da guess skal returnere en variable af typen code
 /// </remarks>
 /// <params>guess har to parametere. Player er af typen player, og bliver brugt
-/// til at finde ud af om gættet kommer fra en computer eller en bruger. board
+/// til at finde ud af om gaettet kommer fra en computer eller en bruger. board
 /// er af typen board, og tager variable af typen board. Board er en liste med
 /// elementer som har typen (code * answer).</params>
 /// <returns>guess returnerer en kode hvis brugerinputtet er korrekt</returns>
@@ -265,7 +265,7 @@ let guess (player : player) (board : board) : code =
     | Human ->
         let mutable userInput = []
         
-        // Printer spillebrættet indeholdende tidliger gæt og dets svarpinde.
+        // Printer spillebraettet indeholdende tidliger gaet og dets svarpinde.
         printfn "\nYour board so far:"
         
         for i = 0 to board.Length-1 do
@@ -285,45 +285,45 @@ let guess (player : player) (board : board) : code =
     | Computer ->
         [Red]
 
-/// <summary>Funktioen gamePlay kører indtil brugeren har gættet rigtigt
+/// <summary>Funktioen gamePlay koerer indtil brugeren har gaettet rigtigt
 /// </summary>
-/// <remarks>Funktionen kører kun når det er brugeren der fungerer som
-/// kodeløser</remarks>
+/// <remarks>Funktionen koerer kun naar det er brugeren der fungerer som
+/// kodeloeser</remarks>
 /// <params>Tager som parameter hiddenCode af typen code. Den bruger dette
-/// parameter til at sammeligne de gæt der bliver lavet med den hemmelige
-/// kode, så den ved hvornår den skal terminere</params>
-/// <returns>Returnerer et heltal med hvor mange forsøg brugeren har brugt på
-/// at gætte koden.</returns>
+/// parameter til at sammeligne de gaet der bliver lavet med den hemmelige
+/// kode, saa den ved hvornaar den skal terminere</params>
+/// <returns>Returnerer et heltal med hvor mange forsoeg brugeren har brugt paa
+/// at gaette koden.</returns>
 let gamePlay hiddenCode =
     let mutable board : board = []
     let mutable humanGuess : code = [Red]
     let mutable validation = (0,0)
     let mutable tries : int = 0
 
-    // Det er først når validate returnerer (0,4) (Når der er 4 sorte pinde)
-    // at løkken terminerer, og brugeren har vundet spillet.
+    // Det er foerst naar validate returnerer (0,4) (Naar der er 4 sorte pinde)
+    // at loekken terminerer, og brugeren har vundet spillet.
     while snd (validation) <> 4 do
         System.Console.Clear()
 
-        // Printer hvor mange gæt man har brugt indtil videre.
+        // Printer hvor mange gaet man har brugt indtil videre.
         printfn "You have used %d guesses so far." tries
         
         humanGuess <- guess Human board
         
         validation <- (validate hiddenCode humanGuess)
         
-        // Spillebrættet bliver opdateret med det nye gæt
+        // Spillebraettet bliver opdateret med det nye gaet
         board <- board @ [(humanGuess, validation)]
 
         tries <- tries + 1
     tries
 
 /// <summary>game funktionen er "main" funktionen i vores program. Den fungerer
-/// ved at den kalder sig selv når der skal startes et nyt spil - derfor er den
+/// ved at den kalder sig selv naar der skal startes et nyt spil - derfor er den
 /// rekursivt defineret.</summary>
-/// <param name="choice">Choice fortæller hvilket
-/// game mode der skal spilles. choice kan antage følgende værdier:
-///   0: Startskærm
+/// <param name="choice">Choice fortaeller hvilket
+/// game mode der skal spilles. choice kan antage foelgende vaerdier:
+///   0: Startskaerm
 ///   1: Human vs. Computer, hvor computer som "codemaker"
 ///   2: Human vs. Human
 ///   3: Computer vs. Human, hvor brugeren fungerer som "codemaker"
@@ -331,20 +331,20 @@ let gamePlay hiddenCode =
 /// </param>
 let rec game choice = 
 
-    /// <summary>Win funktionen bliver kaldt når enten brugeren eller computer
-    /// har gættet rigtigt, og derfor vundet spillet.</summary>
-    /// <param name="player">Parameteret player bruges til at afgøre om det er en bruger eller
+    /// <summary>Win funktionen bliver kaldt naar enten brugeren eller computer
+    /// har gaettet rigtigt, og derfor vundet spillet.</summary>
+    /// <param name="player">Parameteret player bruges til at afgoere om det er en bruger eller
     /// computeren som har vundet.</param>
     /// <param name="gameModeChoice">
     /// Parameteret gameModeChoice bruges til at finde ud af hvilket gamemode
     /// brugeren/computer spillede da han/hun/den vandt. Dette bliver brugt
-    /// når man skal spille igen, for så kalder man game med dette parameter,
-    /// hvis man ønsker at spille samme game mode igen.
+    /// naar man skal spille igen, for saa kalder man game med dette parameter,
+    /// hvis man oensker at spille samme game mode igen.
     /// </param>
-    /// <param name="guessC">guessC er hvor mange gæt computeren har brugt</param>
-    /// <param name="tries">tries er hvor mange gæt brugeren har brugt.</param>
-    /// <returns>Returneringsvædien afhænger af hvad brugeren taster ind
-    /// efter overstået spil</returns>
+    /// <param name="guessC">guessC er hvor mange gaet computeren har brugt</param>
+    /// <param name="tries">tries er hvor mange gaet brugeren har brugt.</param>
+    /// <returns>Returneringsvaedien afhaenger af hvad brugeren taster ind
+    /// efter overstaaet spil</returns>
     let rec win player gameModeChoice guessCounter tries = 
         match player with
         | "Human" -> 
@@ -364,21 +364,21 @@ let rec game choice =
         let userInput = System.Console.ReadLine ()
    
         match userInput with
-        | "1" -> game "0" // Her ledes brugeren tilbage til startskærmen
+        | "1" -> game "0" // Her ledes brugeren tilbage til startskaermen
         | "2" -> game gameModeChoice // Her spilles det samme game mode igen
         | "3" -> System.Environment.Exit 0 // Her afsluttes spillet
 
-        // Her kalder funktionen sig selv, med de nuværende parametre som
-        // argumenter. Den gør dette i stedet for en fejlmeddelelse, og
-        // spørger så brugeren igen om hvad han/hun vil.
+        // Her kalder funktionen sig selv, med de nuvaerende parametre som
+        // argumenter. Den goer dette i stedet for en fejlmeddelelse, og
+        // spoerger saa brugeren igen om hvad han/hun vil.
         | _ -> win player gameModeChoice guessCounter tries
 
-    /// <summary>Funktionen compGuess bliver kaldt når det er computeren der
-    /// skal løse en kode</summary>
-    /// <param name="hiddenCode">Opgaven der skal løses</param>
+    /// <summary>Funktionen compGuess bliver kaldt naar det er computeren der
+    /// skal loese en kode</summary>
+    /// <param name="hiddenCode">Opgaven der skal loeses</param>
     /// <param name="gameChoice">Hvilken gamemode der bliver kaldt fra. Bruges til at spille samme type
-    /// igen fra winskærm</param>
-    /// <remarks>Funktionen køres kun når computeren skal gætte</remarks>
+    /// igen fra winskaerm</param>
+    /// <remarks>Funktionen koeres kun naar computeren skal gaette</remarks>
     let compGuess hiddenCode gameChoice =
         //Variable der bruges under funktionen
         let mutable guessCode : code = []
@@ -388,17 +388,17 @@ let rec game choice =
         //Laver en variabel med 6 elementer, der alle er 0'er.
         let temp = (Array.init 6 (fun _ -> 0))
         
-        //Første 6 gæt 
-        // Hvis koden består af fire ens farver, kan programmet gætte det på
-        // i+1 gæt, hvis koden har værdi i, hvor Red = 0, Green = 1, etc.
+        //Foerste 6 gaet 
+        // Hvis koden bestaar af fire ens farver, kan programmet gaette det paa
+        // i+1 gaet, hvis koden har vaerdi i, hvor Red = 0, Green = 1, etc.
         let mutable whiteCounter = 0
         let mutable n = 0
         let colors = [Red; Green; Yellow; Purple; White; Black]
-        //Laver gæt med samme farve på alle pladser, en farve af gangen
+        //Laver gaet med samme farve paa alle pladser, en farve af gangen
         while (whiteCounter < 4) && (n < 6) do
             guessCode <- [colors.[n]; colors.[n]; colors.[n]; colors.[n]]
-            //Midlertidigt histogram der bruges til at sammensætte 7. gæt. Indsætter tal svarende
-            //til hvor mange sorte stifter der modtages som respons på gæt på plads svarende til
+            //Midlertidigt histogram der bruges til at sammensaette 7. gaet. Indsaetter tal svarende
+            //til hvor mange sorte stifter der modtages som respons paa gaet paa plads svarende til
             //farvenummer
             temp.[n] <- snd (validate hiddenCode [colors.[n]; colors.[n];
                                                   colors.[n]; colors.[n]])
@@ -407,44 +407,44 @@ let rec game choice =
         
         
         
-        //Sammensætter 7. gæt 
+        //Sammensaetter 7. gaet 
         guessCode <- []
         for i = 0 to 5 do
             while temp.[i] > 0 do
                 guessCode <- List.append guessCode [colors.[i]]
                 temp.[i] <- temp.[i] - 1
         
-        //Tjekker hvor mange sorte der gives som respons på sammensatte 7. gæt. 
-        //Hvis opgaven er den samme farve på alle 4 pladser, vil programmet bruge et ekstra
-        //gæt, selvom den har det rigtige gæt. Derfor ændrer vi variablen blacksValidate, som gør at
-        //guessCount ikke tæller op når den er forskellig fra 0.
+        //Tjekker hvor mange sorte der gives som respons paa sammensatte 7. gaet. 
+        //Hvis opgaven er den samme farve paa alle 4 pladser, vil programmet bruge et ekstra
+        //gaet, selvom den har det rigtige gaet. Derfor aendrer vi variablen blacksValidate, som goer at
+        //guessCount ikke taeller op naar den er forskellig fra 0.
         let mutable blacks = 
             guessCount <- guessCount - 1
             blacksValidate <- 1
             snd (validate hiddenCode guessCode)
         
-        //Ændrer den tilbage så gæt tæller op igen ved hver validate
+        //aendrer den tilbage saa gaet taeller op igen ved hver validate
         blacksValidate <- 0
         
         if blacks = 4 then
             let mutable s = 0
-            //Hvis alle farverne er den samme, bruges der ikke et gæt.
+            //Hvis alle farverne er den samme, bruges der ikke et gaet.
             for i = 0 to 5 do
                 if guessCode.[0..3] = [colors.[i]; colors.[i]; colors.[i]; colors.[i]] then
                     s <- s + 1
                 else ()     
             //Men hvis opgaven nu er [Red; Red; Green; Green] vil programmet have den efter andet
-            //gæt. Den skal dog stadig bruge et gæt på rent faktisk at gætte på netop det.
+            //gaet. Den skal dog stadig bruge et gaet paa rent faktisk at gaette paa netop det.
             if s = 0 then
-                //Bruges udelukkende for at bruge et gæt
+                //Bruges udelukkende for at bruge et gaet
                 validate hiddenCode guessCode |> ignore
             else ()
         else
             blacks <- snd (validate hiddenCode guessCode)
         
         /// <summary>Tjekker antal sorte og omrokerer farverne i positionerne</summary>
-        /// <param name="guess">Bruges når programmet kaldes rekursivt til have gemme nuværende
-        /// værdi af guessCode</param>
+        /// <param name="guess">Bruges naar programmet kaldes rekursivt til have gemme nuvaerende
+        /// vaerdi af guessCode</param>
         /// <returns>Kalder win funktionen hvis der gives 4 sorte stifter som respons, ellers
         /// omrokerer den farver</returns>
         let rec compRearrange guess =
@@ -512,9 +512,9 @@ let rec game choice =
                             // Bliver til 1 2 4 3
                             blacks <- snd (validate hiddenCode guessCode)
                             win "Comp" gameChoice guessCount 0
-                        | _ -> printfn "Fejl på 2. indre"
-                    | _ -> printfn "Fejl på 2. midt"
-                | _ -> printfn "Fejl på 2. ydre"
+                        | _ -> printfn "Fejl paa 2. indre"
+                    | _ -> printfn "Fejl paa 2. midt"
+                | _ -> printfn "Fejl paa 2. ydre"
             | 1 ->
                 guessCode <- [guessCode.[3]] @ guessCode.[1..2] @ [guessCode.[0]]
                 // Bliver til 4 2 3 1
@@ -544,7 +544,7 @@ let rec game choice =
                 | 0 ->
                     guessCode <- [guessCode.[3]] @ [guessCode.[2]] @ [guessCode.[1]] @ [guessCode.[0]]
                     compRearrange guessCode 
-                | _ -> printfn "Fejl på 1."
+                | _ -> printfn "Fejl paa 1."
         
             | 0 ->
                 guessCode <- guessCode.[3] :: guessCode.[0..2]
@@ -571,12 +571,12 @@ let rec game choice =
                         compRearrange guessCode
                 | 0 ->
                     compRearrange guessCode
-                | _ -> printfn "Fejl på 0."
-            | _ -> printfn "Fejl på ydre"
+                | _ -> printfn "Fejl paa 0."
+            | _ -> printfn "Fejl paa ydre"
         compRearrange guessCode
 
     if choice = "0" then        
-        //Startskærm
+        //Startskaerm
        
         System.Console.Clear()
 
@@ -653,10 +653,10 @@ let rec game choice =
         printf "Press ENTER to begin playing..."
         let p = System.Console.ReadLine()
          
-        //Kalder funktionen gamePlay der først terminerer når opgaven er løst
+        //Kalder funktionen gamePlay der foerst terminerer naar opgaven er loest
         let humanNumberOfTries = gamePlay hiddenCode
         //Kalder win funktionen. Giver den player, hvilken spiltype der lige blev spillet og hvor
-        //mange forsøg det tog.
+        //mange forsoeg det tog.
         win "Human" "1" 0 humanNumberOfTries
     
     elif choice = "2" then
@@ -673,10 +673,10 @@ let rec game choice =
         printf "Press ENTER to give control to player 2..."
         let p = System.Console.ReadLine()
         
-        //Kalder funktionen gamePlay der først terminerer når opgaven er løst
+        //Kalder funktionen gamePlay der foerst terminerer naar opgaven er loest
         let humanNumberOfTries = gamePlay hiddenCode
         //Kalder win funktionen. Giver den player, hvilken spiltype der lige blev spillet og hvor
-        //mange forsøg det tog.
+        //mange forsoeg det tog.
         win "Human" "2" 0 humanNumberOfTries
         
     elif choice = "3" then
@@ -696,8 +696,8 @@ let rec game choice =
         let p = System.Console.ReadLine()
         let k = System.Console.Clear()
 
-        //Funktionen compGuess kaldes med opgaven og spiltypen. Den terminerer først når opgaven er
-        //løst, og win kaldes videre fra den.
+        //Funktionen compGuess kaldes med opgaven og spiltypen. Den terminerer foerst naar opgaven er
+        //loest, og win kaldes videre fra den.
         compGuess hiddenCode "3"
 
     else
@@ -718,8 +718,8 @@ let rec game choice =
         let p = System.Console.ReadLine()
         let k = System.Console.Clear()
        
-        //Funktionen compGuess kaldes med opgaven og spiltypen. Den terminerer først når opgaven er
-        //løst, og win kaldes videre fra den.
+        //Funktionen compGuess kaldes med opgaven og spiltypen. Den terminerer foerst naar opgaven er
+        //loest, og win kaldes videre fra den.
         compGuess hiddenCode "4"
 
 game "0"
