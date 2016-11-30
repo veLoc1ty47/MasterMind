@@ -439,7 +439,8 @@ let rec game choice =
                 //Bruges udelukkende for at bruge et gæt
                 validate hiddenCode guessCode |> ignore
             else ()
-        else ()
+        else
+            blacks <- snd (validate hiddenCode guessCode)
         
         /// <summary>Tjekker antal sorte og omrokerer farverne i positionerne</summary>
         /// <param name="guess">Bruges når programmet kaldes rekursivt til have gemme nuværende
