@@ -1,4 +1,4 @@
-#load "test.fsx"
+#load "testingCode.fsx"
 
 open mastermind
 
