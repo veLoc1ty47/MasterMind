@@ -357,7 +357,7 @@ let rec game choice =
             printfn "It took it %d guesses!" guessC
             
         printfn "\nWould you like to:"
-        printfn "1. Go to the startpage?"
+        printfn "1. Go to the startmenu?"
         printfn "2. Play the same gamemode again?"
         printfn "3. Quit the game?"
         printf "> "
