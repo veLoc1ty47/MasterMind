@@ -16,7 +16,6 @@ open mastermind
 //    9 playersInputCorrectStartScreen
 //   10 guess
 //   11 gamePlay
-//   12 game
 
 printfn "Black box testing af mastermind.fsx"
 
@@ -170,11 +169,3 @@ printfn "    testet med black box testing."
 
 
 printf "\n\n"
-(******************************************************************************)
-
-// Funktionen gamePlay tager bruger input og kan derfor ikke blive testet med
-// black box testing.
-
-printfn "  12. game funktion"
-printfn "    Funktionen game tager bruger input og kan derfor ikke blive testet"
-printfn "    med black box testing."
